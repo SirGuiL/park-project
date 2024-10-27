@@ -1,0 +1,1 @@
+export { PixModal } from "./PixModal";
