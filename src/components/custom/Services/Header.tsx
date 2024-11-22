@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { useSidebar } from '@/hooks/useSidebar'
-import { Menu, Plus } from 'lucide-react'
-import { RegisterCarDrawer } from '../RegisterCarDrawer/RegisterCarDrawer'
+import { Menu } from 'lucide-react'
+import { Drawer } from '.'
 
 export const Header = () => {
     const { handleOpenSidebar } = useSidebar()
@@ -22,13 +22,7 @@ export const Header = () => {
             </div>
 
             <div className="flex items-center gap-2">
-                <Button className="bg-sky-800 hover:bg-sky-900 text-gray-200 rounded-full flex gap-1 items-center">
-                    <Plus color="#e5e7eb" size={18} strokeWidth={2} />
-
-                    <span>Registrar novo serviço</span>
-                </Button>
-
-                <RegisterCarDrawer />
+                <Drawer />
             </div>
         </header>
     )
