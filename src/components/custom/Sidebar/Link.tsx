@@ -1,8 +1,8 @@
-import { ButtonHTMLAttributes } from "react";
+import { ButtonHTMLAttributes } from 'react'
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
-  icon: React.ReactNode;
-  text: string;
+  icon: React.ReactNode
+  text: string
 }
 
 export const Link = ({ icon, text, ...rest }: Props) => {
@@ -14,5 +14,5 @@ export const Link = ({ icon, text, ...rest }: Props) => {
         {text}
       </span>
     </button>
-  );
-};
+  )
+}
