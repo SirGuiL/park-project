@@ -29,6 +29,33 @@ interface ServicesTableProps {
 }
 
 export const ServicesTable = ({ services }: ServicesTableProps) => {
+  const handleOpenServiceDrawer = () => {
+    const serviceDrawer = document.querySelector(
+      '#add-service'
+    ) as HTMLDivElement
+
+    if (serviceDrawer) {
+      serviceDrawer.click()
+    }
+  }
+
+  if (services.length == 0) {
+    return (
+      <div>
+        <div>
+          Nenhum serviço cadastrado,{' '}
+          <a
+            className="text-sky-700 cursor-pointer"
+            onClick={() => handleOpenServiceDrawer()}
+          >
+            clique aqui
+          </a>{' '}
+          para adicionar um novo
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Table>
       <TableHeader>

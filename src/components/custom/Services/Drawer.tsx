@@ -1,3 +1,5 @@
+import { FormEvent, useState } from 'react'
+
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,33 +21,79 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useState } from 'react'
 import {
   CalendarClock,
   Hourglass,
   LoaderCircle,
   LocateFixed,
   PenLine,
+  Plus,
 } from 'lucide-react'
+import { TagsList } from './TagsList'
+import { useTags } from '@/hooks/useTags'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { tagType } from '@/DTOs/tag'
+import { useServices } from '@/hooks/useServices'
 
 export const Drawer = () => {
   const [method, setMethod] = useState('')
   const [serviceName, setServiceName] = useState('')
   const [value, setValue] = useState('R$ 0,00')
   const [isLoading, setIsLoading] = useState(false)
+  const [tagsSerch, setTagsSerch] = useState('')
+  const [selectedTags, setSelectedTags] = useState<tagType[]>([])
+
+  const { filteredTags, createTag, findTagById } = useTags()
+  const { createService } = useServices()
+
+  const tagsFiltered = filteredTags(tagsSerch)
+  const selectedTagsFormatted = selectedTags.map((tag) => tag.name).join(', ')
 
   const handleSaveService = () => {
     setIsLoading(true)
 
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 5000)
+    const service = {
+      name: serviceName,
+      amount: Number(value.replace('R$ ', '')),
+      method: method,
+      tags: selectedTags,
+    }
+
+    createService(service)
+
+    setIsLoading(false)
+
+    document.getElementById('cancel-btn')?.click()
+  }
+
+  const handleAddTag = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    createTag(tagsSerch)
+  }
+
+  const setTags = (e: string) => {
+    const tag = findTagById(e)
+
+    if (tag) {
+      setSelectedTags([...selectedTags, tag])
+    }
   }
 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button className="bg-sky-800 hover:bg-sky-900 text-gray-200 hover:text-gray-200 rounded-full flex gap-1 items-center">
+        <Button
+          className="bg-sky-800 hover:bg-sky-900 text-gray-200 hover:text-gray-200 rounded-full flex gap-1 items-center"
+          id="add-service"
+        >
           Adicionar novo serviço
         </Button>
       </SheetTrigger>
@@ -148,10 +196,56 @@ export const Drawer = () => {
               </SelectContent>
             </Select>
           </div>
+
+          <div className="flex flex-col items-start gap-1">
+            <Label className="text-right">Tags</Label>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="w-full">
+                  <Input
+                    id="tags-search"
+                    defaultValue={selectedTagsFormatted}
+                    placeholder='Ex: "Lavagem"'
+                  />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white w-[335px]">
+                <DropdownMenuLabel>
+                  <form
+                    className="flex gap-1"
+                    onSubmit={(e) => handleAddTag(e)}
+                  >
+                    <Input
+                      className="placeholder:text-gray-600 placeholder:text-sm placeholder:font-normal"
+                      id="tags-search"
+                      value={tagsSerch}
+                      onChange={(e) => setTagsSerch(e.target.value)}
+                      placeholder='Ex: "Lavagem"'
+                    />
+
+                    {tagsFiltered.length == 0 &&
+                      tagsSerch.trim().length > 0 && (
+                        <Button className="bg-blue-600 hover:bg-blue-700 text-gray-200 rounded-xl flex gap-1 items-center">
+                          <Plus size={16} />
+                        </Button>
+                      )}
+                  </form>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <TagsList tagsSerch={tagsSerch} setTag={setTags} />
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
         <SheetFooter>
           <SheetClose asChild>
-            <Button className="text-gray-900 hover:bg-gray-200 rounded-full flex gap-1 items-center">
+            <Button
+              className="text-gray-900 hover:bg-gray-200 rounded-full flex gap-1 items-center"
+              id="close-service"
+            >
               Cancelar
             </Button>
           </SheetClose>
