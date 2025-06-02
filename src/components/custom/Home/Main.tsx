@@ -1,19 +1,20 @@
-import { Button } from "@/components/ui/button";
-import { List, LayoutGrid } from "lucide-react";
-import { TodaysHistory } from "../TodaysHistory";
-import { useState } from "react";
-import { usePreferences } from "@/hooks/usePreferences";
-import { useTodaysHistory } from "@/hooks/useTodaysHistory";
-import { Tooltip } from "react-tooltip";
-import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button'
+import { List, LayoutGrid } from 'lucide-react'
+import { TodaysHistory } from '../TodaysHistory'
+import { useState } from 'react'
+import { usePreferences } from '@/hooks/usePreferences'
+import { useTodaysHistory } from '@/hooks/useTodaysHistory'
+import { Tooltip } from 'react-tooltip'
+import { Input } from '@/components/ui/input'
+import { Link } from 'react-router-dom'
 
 export const Main = () => {
-  const [historyOrientation, setHistoryOrientation] = useState<"grid" | "list">(
-    "list"
-  );
+  const [historyOrientation, setHistoryOrientation] = useState<'grid' | 'list'>(
+    'list'
+  )
 
-  const { numberOfVacancies } = usePreferences();
-  const { totalParked, totalWash, search, setSearch } = useTodaysHistory();
+  const { numberOfVacancies } = usePreferences()
+  const { totalParked, totalWash, search, setSearch } = useTodaysHistory()
 
   return (
     <main className="flex flex-1 py-2 px-4">
@@ -38,7 +39,7 @@ export const Main = () => {
               className="flex items-center justify-center hover:bg-gray-100 p-0 w-8 h-8 rounded-sm shadow-none"
               data-tooltip-id="my-tooltip"
               data-tooltip-content="Lista"
-              onClick={() => setHistoryOrientation("list")}
+              onClick={() => setHistoryOrientation('list')}
             >
               <List color="#111827" size={24} strokeWidth={2} />
             </Button>
@@ -47,7 +48,7 @@ export const Main = () => {
               className="flex items-center justify-center hover:bg-gray-100 p-0 w-8 h-8 rounded-sm shadow-none"
               data-tooltip-id="my-tooltip"
               data-tooltip-content="Quadros"
-              onClick={() => setHistoryOrientation("grid")}
+              onClick={() => setHistoryOrientation('grid')}
             >
               <LayoutGrid color="#111827" size={24} strokeWidth={2} />
             </Button>
@@ -66,17 +67,17 @@ export const Main = () => {
               Lavagens de hoje: {totalWash}
             </span>
 
-            <a
+            <Link
               className="text-sky-600 text-sm hover:text-sky-700 duration-200 transition-all self-start"
-              href="/metricas"
+              to={'/metricas'}
             >
               Métricas avançadas
-            </a>
+            </Link>
           </div>
         </div>
       </div>
 
       <Tooltip id="my-tooltip" />
     </main>
-  );
-};
+  )
+}

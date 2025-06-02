@@ -1,5 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { DialogClose } from "@radix-ui/react-dialog";
+import { useState } from 'react'
+
+import { Button } from '@/components/ui/button'
+import { DialogClose } from '@radix-ui/react-dialog'
 import {
   Select,
   SelectContent,
@@ -7,7 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -15,78 +17,108 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { PixModal } from '../PixModal'
 
-import { useTodaysHistory } from "@/hooks/useTodaysHistory";
-import { Banknote, CreditCard } from "lucide-react";
-import Pix from "../icons/pix.svg";
-import { usePreferences } from "@/hooks/usePreferences";
+import { useTodaysHistory } from '@/hooks/useTodaysHistory'
+import { usePreferences } from '@/hooks/usePreferences'
+
+import { Banknote, CreditCard } from 'lucide-react'
+
+import Pix from '../icons/pix.svg'
 import {
   calculateTotalPrice,
+  formatCentsToBRL,
   formatPriceToBRL,
   getAdditionByMethod,
-} from "@/lib/utils";
-import { car } from "@/DTOs/car";
-import { useState } from "react";
-import { PixModal } from "../PixModal";
+} from '@/lib/utils'
+import { car } from '@/DTOs/car'
 
 interface Props {
-  carId: string;
+  carId: string
 }
 
+type checkboxType = boolean | 'indeterminate'
+
 export const ChargeModal = ({ carId }: Props) => {
-  const [method, setMethod] = useState("pix");
-  const [, setRefresh] = useState(0);
+  const [method, setMethod] = useState('pix')
+  const [, setRefresh] = useState(0)
 
-  const { getCarById } = useTodaysHistory();
-  const { hourPrice, tax } = usePreferences();
-  const { creditRate, debitRate, moneyRate, pixRate } = tax;
+  const [customPrice, setCustomPrice] = useState<number>(0)
+  const [customTaxPrice, setCustomTaxPrice] = useState<number>(0)
+  const [customValue, setCustomValue] = useState<checkboxType>(false)
+  const [customTax, setCustomTax] = useState<checkboxType>(false)
 
-  const car = getCarById(carId) as car;
+  const { getCarById } = useTodaysHistory()
+  const { hourPrice, tax } = usePreferences()
+  const { creditRate, debitRate, moneyRate, pixRate } = tax
+
+  const car = getCarById(carId) as car
+
+  const formattedCustomPrice = formatCentsToBRL(customPrice)
+  const formattedCustomTax = formatCentsToBRL(customTaxPrice)
 
   const addition = getAdditionByMethod(method, {
     creditRate,
     debitRate,
     moneyRate,
     pixRate,
-  });
+  })
 
   const totalPrice = calculateTotalPrice({
     addition,
     created_at: car ? car.created_at : new Date(),
     price: hourPrice,
-  });
+  })
 
   const forceUpdate = () => {
-    setMethod("pix");
-    setRefresh((prev) => prev + 1);
-  };
+    setMethod('pix')
+    setRefresh((prev) => prev + 1)
+  }
 
   const handleCharge = () => {
-    if (method == "pix") {
-      handleOpenPixModal();
+    if (method == 'pix') {
+      handleOpenPixModal()
     }
 
-    if (method == "credit") {
+    if (method == 'credit') {
       // send to card machine
     }
 
-    if (method == "debit") {
+    if (method == 'debit') {
       // send to card machine
     }
 
     // money method
-  };
+    handlePaymentWithMoney()
+  }
 
   const handleOpenPixModal = () => {
-    const button = document.getElementById("pix-button");
+    const button = document.getElementById('pix-button')
 
     if (button) {
-      button.click();
+      button.click()
     }
-  };
+  }
+
+  const handlePaymentWithMoney = () => {
+    // finish payment and change status of daily history
+  }
+
+  const handleSetCustomTaxPrice = (e: string) => {
+    const cleanText = e.replace(/[^0-9]/g, '')
+
+    setCustomTaxPrice(Number(cleanText))
+  }
+
+  const handleSetCustomPrice = (e: string) => {
+    const cleanText = e.replace(/[^0-9]/g, '')
+
+    setCustomPrice(Number(cleanText))
+  }
 
   return (
     <Dialog onOpenChange={() => forceUpdate()}>
@@ -96,7 +128,7 @@ export const ChargeModal = ({ carId }: Props) => {
 
       <DialogContent className="sm:max-w-[425px] bg-white flex flex-col gap-10 sm:rounded-xl">
         <DialogHeader>
-          <DialogTitle>{`Cobrar ${car ? car.name : ""}`}</DialogTitle>
+          <DialogTitle>{`Cobrar ${car ? car.name : ''}`}</DialogTitle>
         </DialogHeader>
 
         <form className="flex flex-col items-start gap-4">
@@ -152,12 +184,47 @@ export const ChargeModal = ({ carId }: Props) => {
 
           <div className="flex flex-col gap-2 w-full">
             <Label>Total</Label>
-            <Input disabled value={formatPriceToBRL(totalPrice.total)} />
+            <Input
+              disabled={!customValue}
+              onChange={(e) => handleSetCustomPrice(e.target.value)}
+              value={
+                customValue
+                  ? formattedCustomPrice
+                  : formatPriceToBRL(totalPrice.total)
+              }
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="custom-value"
+              checked={customValue}
+              onCheckedChange={setCustomValue}
+            />
+
+            <Label htmlFor="custom-value">Adicionar valores customizados</Label>
           </div>
 
           <div className="flex flex-col gap-2 w-full">
             <Label>Acréscimo</Label>
-            <Input disabled value={formatPriceToBRL(totalPrice.addition)} />
+            <Input
+              disabled={!customTax}
+              onChange={(e) => handleSetCustomTaxPrice(e.target.value)}
+              value={
+                customTax
+                  ? formattedCustomTax
+                  : formatPriceToBRL(totalPrice.addition)
+              }
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="custom-tax"
+              checked={customTax}
+              onCheckedChange={setCustomTax}
+            />
+            <Label htmlFor="custom-tax">Adicionar valores customizados</Label>
           </div>
         </form>
 
@@ -184,5 +251,5 @@ export const ChargeModal = ({ carId }: Props) => {
 
       <PixModal />
     </Dialog>
-  );
-};
+  )
+}

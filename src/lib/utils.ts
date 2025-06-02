@@ -73,6 +73,15 @@ export function formatPriceToBRL(price: number) {
   }).format(price)
 }
 
+export function formatCentsToBRL(cents: number) {
+  const brl = cents / 100
+
+  return brl.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  })
+}
+
 export function getContrastColor(hexColor: string) {
   hexColor = hexColor.replace('#', '')
 

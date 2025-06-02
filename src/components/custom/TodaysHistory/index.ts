@@ -1,5 +1,6 @@
-export { TodaysHistory } from "./TodaysHistory";
-export { GridHistory } from "./GridHistory";
-export { ListHistory } from "./ListHistory";
-export { ListHistoryItem } from "./ListHistoryItem";
-export { GridHistoryItem } from "./GridHistoryItem";
+export { TodaysHistory } from './TodaysHistory'
+export { GridHistory } from './GridHistory'
+export { ListHistory } from './ListHistory'
+export { ListHistoryItem } from './ListHistoryItem'
+export { GridHistoryItem } from './GridHistoryItem'
+export { RemoveCarModal } from './RemoveCarModal'

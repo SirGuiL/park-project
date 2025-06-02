@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, ReactNode, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -42,7 +42,11 @@ import {
 import { tagType } from '@/DTOs/tag'
 import { useServices } from '@/hooks/useServices'
 
-export const Drawer = () => {
+interface DrawerProps {
+  trigger?: ReactNode
+}
+
+export const Drawer = ({ trigger }: DrawerProps) => {
   const [method, setMethod] = useState('')
   const [serviceName, setServiceName] = useState('')
   const [value, setValue] = useState('R$ 0,00')
@@ -90,12 +94,14 @@ export const Drawer = () => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button
-          className="bg-sky-800 hover:bg-sky-900 text-gray-200 hover:text-gray-200 rounded-full flex gap-1 items-center"
-          id="add-service"
-        >
-          Adicionar novo serviço
-        </Button>
+        {trigger || (
+          <Button
+            className="bg-sky-800 hover:bg-sky-900 text-gray-200 hover:text-gray-200 rounded-full flex gap-1 items-center"
+            id="add-service"
+          >
+            Adicionar novo serviço
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent className="bg-white">
         <SheetHeader>

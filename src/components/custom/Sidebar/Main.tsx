@@ -12,6 +12,7 @@ import {
   Home,
   Settings,
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 export function Main() {
   const items = [
@@ -49,13 +50,13 @@ export function Main() {
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild>
-                <a
-                  href={item.url}
+                <Link
+                  to={item.url}
                   className="text-white hover:text-white sm:hover:bg-gray-900"
                 >
                   <item.icon />
                   <span>{item.title}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
