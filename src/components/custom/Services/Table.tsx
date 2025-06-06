@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Table,
   TableBody,
@@ -8,8 +8,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Ellipsis } from 'lucide-react'
+import { Menu } from './Menu'
 
 type tagType = {
+  id: string
   name: string
   color: string
 }
@@ -20,7 +23,7 @@ type serviceType = {
   amount: number
   method: string
   tags: tagType[]
-  updated_at: Date
+  updated_at?: Date
   id: string
 }
 
@@ -36,6 +39,19 @@ export const ServicesTable = ({ services }: ServicesTableProps) => {
 
     if (serviceDrawer) {
       serviceDrawer.click()
+    }
+  }
+
+  const formatMethodSpan = (method: string) => {
+    switch (method) {
+      case 'fixed':
+        return 'Fixo'
+      case 'hour':
+        return 'Hora'
+      case 'day':
+        return 'Dia'
+      case 'custom':
+        return 'Personalizado'
     }
   }
 
@@ -63,35 +79,32 @@ export const ServicesTable = ({ services }: ServicesTableProps) => {
           <TableHead className="w-[200px]">Nome</TableHead>
           <TableHead>Método</TableHead>
           <TableHead>Tags</TableHead>
-          <TableHead className="text-right">Amount</TableHead>
+          <TableHead>Amount</TableHead>
+          <TableHead className="text-right"></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {services.map((service) => (
           <TableRow key={service.id}>
             <TableCell>{service.name}</TableCell>
-            <TableCell>{service.method}</TableCell>
+            <TableCell>{formatMethodSpan(service.method)}</TableCell>
             <TableCell className="flex gap-2">
-              {service.tags.map((tag, index) => {
-                return (
-                  <Badge
-                    className="rounded-xl"
-                    variant="secondary"
-                    key={index}
-                    style={{
-                      backgroundColor: tag.color,
-                    }}
-                  >
-                    {tag.name}
-                  </Badge>
-                )
-              })}
+              <span>{service.tags.map((tag) => tag.name).join(', ')}</span>
             </TableCell>
-            <TableCell className="text-right">
+            <TableCell>
               {service.amount.toLocaleString('pt-BR', {
                 style: 'currency',
                 currency: 'BRL',
               })}
+            </TableCell>
+            <TableCell className="text-right">
+              <Menu
+                trigger={
+                  <Button variant="secondary" size="icon" className="size-8">
+                    <Ellipsis />
+                  </Button>
+                }
+              />
             </TableCell>
           </TableRow>
         ))}

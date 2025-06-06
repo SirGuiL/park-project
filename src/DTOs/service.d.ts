@@ -1,3 +1,5 @@
+import { tagType } from './tag'
+
 export interface serviceType {
   id: string
   name: string

@@ -36,7 +36,9 @@ export const Main = () => {
         <div className="flex flex-col gap-4">
           <div className="flex gap-2 shadow-lg p-2 items-center justify-center self-start">
             <Button
-              className="flex items-center justify-center hover:bg-gray-100 p-0 w-8 h-8 rounded-sm shadow-none"
+              className={`flex items-center justify-center hover:bg-gray-100 p-0 w-8 h-8 rounded-sm shadow-none ${
+                historyOrientation === 'list' ? 'bg-gray-100' : ''
+              }`}
               data-tooltip-id="my-tooltip"
               data-tooltip-content="Lista"
               onClick={() => setHistoryOrientation('list')}
@@ -45,7 +47,9 @@ export const Main = () => {
             </Button>
 
             <Button
-              className="flex items-center justify-center hover:bg-gray-100 p-0 w-8 h-8 rounded-sm shadow-none"
+              className={`flex items-center justify-center hover:bg-gray-100 p-0 w-8 h-8 rounded-sm shadow-none ${
+                historyOrientation === 'grid' ? 'bg-gray-100' : ''
+              }`}
               data-tooltip-id="my-tooltip"
               data-tooltip-content="Quadros"
               onClick={() => setHistoryOrientation('grid')}

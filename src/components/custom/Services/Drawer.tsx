@@ -41,6 +41,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { tagType } from '@/DTOs/tag'
 import { useServices } from '@/hooks/useServices'
+import { formatCentsToBRL } from '@/lib/utils'
 
 interface DrawerProps {
   trigger?: ReactNode
@@ -65,7 +66,7 @@ export const Drawer = ({ trigger }: DrawerProps) => {
 
     const service = {
       name: serviceName,
-      amount: Number(value.replace('R$ ', '')),
+      amount: Number(value.replace(',', '.').replace(/[^\d.]/g, '')),
       method: method,
       tags: selectedTags,
     }
@@ -74,7 +75,7 @@ export const Drawer = ({ trigger }: DrawerProps) => {
 
     setIsLoading(false)
 
-    document.getElementById('cancel-btn')?.click()
+    document.getElementById('close-service')?.click()
   }
 
   const handleAddTag = (e: FormEvent<HTMLFormElement>) => {
@@ -137,17 +138,10 @@ export const Drawer = ({ trigger }: DrawerProps) => {
               value={value}
               onChange={(e) => setValue(e.target.value)}
               onInput={(e) => {
-                const currency =
+                ;(e.target as HTMLInputElement).value = formatCentsToBRL(
                   Number(
                     (e.target as HTMLInputElement).value.replace(/[^\d]/g, '')
-                  ) / 100
-
-                ;(e.target as HTMLInputElement).value = currency.toLocaleString(
-                  'pt-BR',
-                  {
-                    style: 'currency',
-                    currency: 'BRL',
-                  }
+                  )
                 )
               }}
             />
