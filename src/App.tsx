@@ -6,6 +6,8 @@ import { SidebarProvider } from './components/ui/sidebar'
 
 import { Home } from './pages/Home'
 import { Services } from './pages/Services'
+import { SignIn } from './pages/SignIn'
+import { SignUp } from './pages/SignUp'
 
 import { SidebarContextProvider } from './contexts/SidebarContext'
 import { TodaysHistoryContextProvider } from './contexts/TodaysHistoryContext'
@@ -18,6 +20,8 @@ import { useSidebar } from './hooks/useSidebar'
 function App() {
   const { isOpened } = useSidebar()
 
+  const withoutSidebar = ['/cadastro', '/entrar']
+
   return (
     <TagsContextProvider>
       <ServicesContextProvider>
@@ -26,11 +30,15 @@ function App() {
             <TodaysHistoryContextProvider>
               <SidebarContextProvider>
                 <div className="w-screen h-screen overflow-hidden flex">
-                  <Sidebar />
+                  {!withoutSidebar.includes(window.location.pathname) && (
+                    <Sidebar />
+                  )}
 
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/servicos" element={<Services />} />
+                    <Route path="/cadastro" element={<SignUp />} />
+                    <Route path="/entrar" element={<SignIn />} />
                   </Routes>
                 </div>
 

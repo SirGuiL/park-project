@@ -101,3 +101,27 @@ export function getContrastColor(hexColor: string) {
 
   return relativeLuminance > 0.5 ? '#000000' : '#FFFFFF'
 }
+
+export function isValidPassword(password: string) {
+  if (password.length < 8) {
+    return false
+  }
+
+  if (!/\d/.test(password)) {
+    return false
+  }
+
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    return false
+  }
+
+  if (!/[A-Za-z]/.test(password)) {
+    return false
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    return false
+  }
+
+  return true
+}
