@@ -7,6 +7,16 @@ type loginProps = {
 
 export class AuthService {
   static async login(props: loginProps) {
-    return await api.post('/login', props)
+    return await api.post('/auth/login', props, { withCredentials: true })
+  }
+
+  static async refreshToken() {
+    return await api.post(
+      '/auth/refresh',
+      {},
+      {
+        withCredentials: true,
+      }
+    )
   }
 }

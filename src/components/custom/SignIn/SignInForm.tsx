@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AuthService } from '@/services/AuthService'
+import { AuthStorage } from '@/storage/authStorage'
 
 type errorsType = {
   firstName: string
@@ -69,9 +70,10 @@ export const SignInForm = () => {
 
   const login = async () => {
     try {
-      const response = await AuthService.login({ email, password })
+      await AuthService.login({ email, password })
 
-      console.log(response.data)
+      await getAccessToken()
+
       toast.success('Usuário logado com sucesso!', {
         position: 'top-right',
       })
@@ -81,6 +83,17 @@ export const SignInForm = () => {
       toast.error('E-mail ou senha inválidos', {
         position: 'top-right',
       })
+    }
+  }
+
+  const getAccessToken = async () => {
+    try {
+      const response = await AuthService.refreshToken()
+
+      AuthStorage.setAccessToken(response.data.accessToken)
+      window.location.href = '/'
+    } catch (error) {
+      console.error(error)
     }
   }
 

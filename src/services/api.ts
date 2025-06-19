@@ -1,26 +1,38 @@
-import { useNavigate } from 'react-router'
 import axios from 'axios'
+import { AuthService } from './AuthService'
+import { AuthStorage } from '@/storage/authStorage'
 
 const api = axios.create({
   baseURL: 'http://localhost:3000',
 })
 
+const accessToken = AuthStorage.getAccessToken()
+
+if (accessToken) {
+  api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (err) => {
-    const { status } = err.response
-    const refreshToken = localStorage.getItem('@spark:refreshToken')
+    const { status } = err.response || {}
 
-    const navigate = useNavigate()
+    const nonAuthRoutes = ['/entrar', '/cadastro']
 
-    if (status === 401 && refreshToken) {
-      // TODO: try to refresh token
-      return Promise.reject(err)
-    }
+    if (status === 401 && !nonAuthRoutes.includes(window.location.pathname)) {
+      try {
+        const response = await AuthService.refreshToken()
+        const { accessToken } = response.data
 
-    if (status === 401) {
-      navigate('/login')
-      return Promise.reject(err)
+        AuthStorage.setAccessToken(accessToken)
+
+        api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
+
+        return api.request(err.config)
+      } catch {
+        window.location.href = '/entrar'
+        return Promise.reject(err)
+      }
     }
 
     throw err

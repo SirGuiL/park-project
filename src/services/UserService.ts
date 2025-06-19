@@ -12,4 +12,8 @@ export class UserService {
   static async create(props: createProps) {
     return await api.post('/users', props)
   }
+
+  static async get() {
+    return await api.get('/users')
+  }
 }

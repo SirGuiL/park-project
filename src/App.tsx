@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { Routes, Route } from 'react-router-dom'
 
@@ -16,11 +17,38 @@ import { ServicesContextProvider } from './contexts/ServicesContext'
 import { TagsContextProvider } from './contexts/TagsContext'
 
 import { useSidebar } from './hooks/useSidebar'
+import { UserService } from './services/UserService'
+import { AccountService } from './services/AccountService'
 
 function App() {
   const { isOpened } = useSidebar()
 
   const withoutSidebar = ['/cadastro', '/entrar']
+
+  useEffect(() => {
+    getUser()
+    getAccount()
+  }, [])
+
+  const getUser = async () => {
+    try {
+      const response = await UserService.get()
+
+      console.log(response.data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const getAccount = async () => {
+    try {
+      const response = await AccountService.get()
+
+      console.log(response.data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   return (
     <TagsContextProvider>
