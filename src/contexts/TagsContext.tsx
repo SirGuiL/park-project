@@ -1,11 +1,16 @@
-import { ReactNode, createContext, useState } from 'react'
-import { v4 as uuid } from 'uuid'
-
+import { ReactNode, createContext, useCallback, useState } from 'react'
 import { tagType } from '../DTOs/tag'
+
+type createTagType = {
+  name: string
+  id: string
+  createdAt: Date
+}
 
 export type TagsContextProps = {
   tags: tagType[]
-  createTag: (tag: string) => void
+  setStoredTags: (tags: tagType[]) => void
+  createTag: (tag: createTagType) => void
   filteredTags: (query: string) => tagType[]
   changeTagColor: (id: string, color: string) => void
   findTagById: (id: string) => tagType | undefined
@@ -22,11 +27,11 @@ export const TagsContext = createContext<TagsContextProps>(
 export function TagsContextProvider({ children }: TagsContextProviderProps) {
   const [tags, setTags] = useState<tagType[]>([])
 
-  const createTag = (tag: string) => {
+  const createTag = (tag: createTagType) => {
     const newTag = {
-      name: tag,
-      color: '#FFFFFF',
-      id: uuid(),
+      name: tag.name,
+      id: tag.id,
+      createdAt: tag.createdAt,
     }
 
     setTags([...tags, newTag])
@@ -57,6 +62,10 @@ export function TagsContextProvider({ children }: TagsContextProviderProps) {
     return tags.find((tag) => tag.id === id)
   }
 
+  const setStoredTags = useCallback((tags: tagType[]) => {
+    setTags(tags)
+  }, [])
+
   return (
     <TagsContext.Provider
       value={{
@@ -65,6 +74,7 @@ export function TagsContextProvider({ children }: TagsContextProviderProps) {
         filteredTags,
         changeTagColor,
         findTagById,
+        setStoredTags,
       }}
     >
       {children}

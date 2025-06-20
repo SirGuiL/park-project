@@ -16,10 +16,16 @@ api.interceptors.response.use(
   (response) => response,
   async (err) => {
     const { status } = err.response || {}
-
     const nonAuthRoutes = ['/entrar', '/cadastro']
+    const originalRequest = err.config
 
-    if (status === 401 && !nonAuthRoutes.includes(window.location.pathname)) {
+    if (
+      status === 401 &&
+      !originalRequest._retry &&
+      !nonAuthRoutes.includes(window.location.pathname)
+    ) {
+      originalRequest._retry = true
+
       try {
         const response = await AuthService.refreshToken()
         const { accessToken } = response.data
@@ -27,8 +33,9 @@ api.interceptors.response.use(
         AuthStorage.setAccessToken(accessToken)
 
         api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
+        originalRequest.headers['Authorization'] = `Bearer ${accessToken}`
 
-        return api.request(err.config)
+        return api(originalRequest)
       } catch {
         window.location.href = '/entrar'
         return Promise.reject(err)
