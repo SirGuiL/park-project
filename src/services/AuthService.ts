@@ -19,4 +19,8 @@ export class AuthService {
       }
     )
   }
+
+  static async logout() {
+    return await api.post('/auth/logout', {}, { withCredentials: true })
+  }
 }

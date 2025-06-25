@@ -36,7 +36,7 @@
     "react-hot-toast": "^2.4.1",
     "react-qr-code": "^2.0.15",
     "react-router-dom": "^6.28.0",
-    "react-tooltip": "^5.28.0",
+    "react-tooltip": "^5.29.1",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^10.0.0"

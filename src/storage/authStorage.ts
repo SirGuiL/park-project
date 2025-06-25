@@ -6,4 +6,8 @@ export class AuthStorage {
   static getAccessToken() {
     return localStorage.getItem('@spark:accessToken')
   }
+
+  static removeAccessToken() {
+    localStorage.removeItem('@spark:accessToken')
+  }
 }

@@ -1,3 +1,6 @@
+import { Tooltip } from 'react-tooltip'
+import { Link } from 'react-router-dom'
+
 import {
   Sidebar,
   SidebarContent,
@@ -11,10 +14,16 @@ import {
   History,
   Home,
   Settings,
+  LogOut,
 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+
+import { useSidebar } from '@/hooks/useSidebar'
+import { AuthStorage } from '@/storage/authStorage'
+import { AuthService } from '@/services/AuthService'
 
 export function Main() {
+  const { isOpened } = useSidebar()
+
   const items = [
     {
       title: 'Início',
@@ -41,7 +50,22 @@ export function Main() {
       url: '/configuracoes',
       icon: Settings,
     },
+    {
+      title: 'Sair',
+      url: '/entrar',
+      icon: LogOut,
+    },
   ]
+
+  const handleLogout = () => {
+    AuthStorage.removeAccessToken()
+
+    try {
+      AuthService.logout()
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
@@ -53,6 +77,10 @@ export function Main() {
                 <Link
                   to={item.url}
                   className="text-white hover:text-white sm:hover:bg-gray-900"
+                  data-tooltip-id={isOpened ? 'sidebar-tooltip' : ''}
+                  data-tooltip-content={item.title}
+                  data-tooltip-place="right"
+                  onClick={item.url === '/entrar' ? handleLogout : undefined}
                 >
                   <item.icon />
                   <span>{item.title}</span>
@@ -62,6 +90,8 @@ export function Main() {
           ))}
         </SidebarMenu>
       </SidebarContent>
+
+      <Tooltip id="sidebar-tooltip" />
     </Sidebar>
   )
 }

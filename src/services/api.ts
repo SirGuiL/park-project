@@ -19,6 +19,11 @@ api.interceptors.response.use(
     const nonAuthRoutes = ['/entrar', '/cadastro']
     const originalRequest = err.config
 
+    if (originalRequest.url == '/auth/refresh') {
+      window.location.href = '/entrar'
+      return Promise.reject(err)
+    }
+
     if (
       status === 401 &&
       !originalRequest._retry &&

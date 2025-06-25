@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 
 import { Sidebar } from './components/custom/Sidebar/Sidebar'
 import { SidebarProvider } from './components/ui/sidebar'
@@ -22,6 +22,7 @@ import { AccountService } from './services/AccountService'
 
 function App() {
   const { isOpened } = useSidebar()
+  const location = useLocation()
 
   const withoutSidebar = ['/cadastro', '/entrar']
 
@@ -58,9 +59,7 @@ function App() {
             <TodaysHistoryContextProvider>
               <SidebarContextProvider>
                 <div className="w-screen h-screen overflow-hidden flex">
-                  {!withoutSidebar.includes(window.location.pathname) && (
-                    <Sidebar />
-                  )}
+                  {!withoutSidebar.includes(location.pathname) && <Sidebar />}
 
                   <Routes>
                     <Route path="/" element={<Home />} />
