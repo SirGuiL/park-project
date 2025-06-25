@@ -1,10 +1,11 @@
-import { ReactNode, createContext, useState } from 'react'
+import { ReactNode, createContext, useCallback, useState } from 'react'
 
 import { serviceType } from '../DTOs/service'
 
 export type ServicesContextProps = {
   services: serviceType[]
   createService: (service: serviceType) => void
+  setStoredServices: (services: serviceType[]) => void
 }
 
 type ServicesContextProviderProps = {
@@ -24,11 +25,16 @@ export function ServicesContextProvider({
     setServices([...services, service])
   }
 
+  const setStoredServices = useCallback((services: serviceType[]) => {
+    setServices(services)
+  }, [])
+
   return (
     <ServicesContext.Provider
       value={{
         services,
         createService,
+        setStoredServices,
       }}
     >
       {children}

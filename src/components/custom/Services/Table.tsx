@@ -10,28 +10,17 @@ import {
 } from '@/components/ui/table'
 import { Ellipsis } from 'lucide-react'
 import { Menu } from './Menu'
-
-type tagType = {
-  id: string
-  name: string
-  color: string
-}
-
-type serviceType = {
-  name: string
-  created_at: Date
-  amount: number
-  method: string
-  tags: tagType[]
-  updated_at?: Date
-  id: string
-}
+import { serviceType } from '@/DTOs/service'
+import { ServicesService } from '@/services/ServicesService'
+import { useServices } from '@/hooks/useServices'
 
 interface ServicesTableProps {
   services: serviceType[]
 }
 
 export const ServicesTable = ({ services }: ServicesTableProps) => {
+  const { setStoredServices } = useServices()
+
   const handleOpenServiceDrawer = () => {
     const serviceDrawer = document.querySelector(
       '#add-service'
@@ -42,16 +31,23 @@ export const ServicesTable = ({ services }: ServicesTableProps) => {
     }
   }
 
-  const formatMethodSpan = (method: string) => {
-    switch (method) {
-      case 'fixed':
-        return 'Fixo'
-      case 'hour':
-        return 'Hora'
-      case 'day':
-        return 'Dia'
-      case 'custom':
-        return 'Personalizado'
+  const deleteService = async (id: string) => {
+    try {
+      await ServicesService.delete({ id })
+
+      fetchServices()
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const fetchServices = async () => {
+    try {
+      const response = await ServicesService.fetchAll()
+
+      setStoredServices(response.data)
+    } catch (error) {
+      console.error(error)
     }
   }
 
@@ -76,10 +72,9 @@ export const ServicesTable = ({ services }: ServicesTableProps) => {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[200px]">Nome</TableHead>
-          <TableHead>Método</TableHead>
-          <TableHead>Tags</TableHead>
-          <TableHead>Amount</TableHead>
+          <TableHead className="w-full">Nome</TableHead>
+          <TableHead className="min-w-[200px]">Tags</TableHead>
+          <TableHead className="min-w-[200px]">Preço</TableHead>
           <TableHead className="text-right"></TableHead>
         </TableRow>
       </TableHeader>
@@ -87,7 +82,6 @@ export const ServicesTable = ({ services }: ServicesTableProps) => {
         {services.map((service) => (
           <TableRow key={service.id}>
             <TableCell>{service.name}</TableCell>
-            <TableCell>{formatMethodSpan(service.method)}</TableCell>
             <TableCell className="flex gap-2">
               <span>{service.tags.map((tag) => tag.name).join(', ')}</span>
             </TableCell>
@@ -104,6 +98,8 @@ export const ServicesTable = ({ services }: ServicesTableProps) => {
                     <Ellipsis />
                   </Button>
                 }
+                handleDeleteService={() => deleteService(service.id)}
+                handleEditService={() => {}}
               />
             </TableCell>
           </TableRow>

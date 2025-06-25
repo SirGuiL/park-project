@@ -35,8 +35,8 @@ export const Drawer = ({ trigger }: DrawerProps) => {
   const tagPopover = useRef(null)
   const tagButton = useRef(null)
 
-  const { createService } = useServices()
   const { tags, createTag, setStoredTags } = useTags()
+  const { setStoredServices } = useServices()
 
   const formattedTags = tags.map((tag) => {
     return {
@@ -49,27 +49,29 @@ export const Drawer = ({ trigger }: DrawerProps) => {
     setIsLoading(true)
 
     try {
-      const response = await ServicesService.create({
+      await ServicesService.create({
         name: serviceName.trim(),
         amount: Number(value.replace(',', '.').replace(/[^\d.]/g, '')),
         tags: tagsSerch,
       })
 
-      console.log(response.data)
-
-      createService({
-        id: response.data.id,
-        name: response.data.name,
-        amount: response.data.amount,
-        createdAt: response.data.createdAt,
-        tags: response.data.tags,
-      })
+      fetchServices()
 
       document.getElementById('close-service')?.click()
     } catch (error) {
       console.error(error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const fetchServices = async () => {
+    try {
+      const response = await ServicesService.fetchAll()
+
+      setStoredServices(response.data)
+    } catch (error) {
+      console.error(error)
     }
   }
 
