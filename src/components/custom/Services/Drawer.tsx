@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,15 +15,10 @@ import {
 } from '@/components/ui/sheet'
 import { ChevronsUpDown, LoaderCircle, Plus } from 'lucide-react'
 import { useTags } from '@/hooks/useTags'
-import { tagType } from '@/DTOs/tag'
-import { useServices } from '@/hooks/useServices'
 import { formatCentsToBRL } from '@/lib/utils'
 import { TagsService } from '@/services/TagsService'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { ServicesService } from '@/services/ServicesService'
+import { useServices } from '@/hooks/useServices'
 
 interface DrawerProps {
   trigger?: ReactNode
@@ -37,8 +32,11 @@ export const Drawer = ({ trigger }: DrawerProps) => {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
-  const { tags, createTag, setStoredTags } = useTags()
+  const tagPopover = useRef(null)
+  const tagButton = useRef(null)
+
   const { createService } = useServices()
+  const { tags, createTag, setStoredTags } = useTags()
 
   const formattedTags = tags.map((tag) => {
     return {
@@ -47,22 +45,32 @@ export const Drawer = ({ trigger }: DrawerProps) => {
     }
   })
 
-  const handleSaveService = () => {
+  const handleSaveService = async () => {
     setIsLoading(true)
 
-    const service = {
-      name: serviceName,
-      amount: Number(value.replace(',', '.').replace(/[^\d.]/g, '')),
-      tags: tagsSerch.map((tag) => {
-        return tags.find((t) => t.id === tag) as tagType
-      }),
+    try {
+      const response = await ServicesService.create({
+        name: serviceName.trim(),
+        amount: Number(value.replace(',', '.').replace(/[^\d.]/g, '')),
+        tags: tagsSerch,
+      })
+
+      console.log(response.data)
+
+      createService({
+        id: response.data.id,
+        name: response.data.name,
+        amount: response.data.amount,
+        createdAt: response.data.createdAt,
+        tags: response.data.tags,
+      })
+
+      document.getElementById('close-service')?.click()
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsLoading(false)
     }
-
-    createService(service)
-
-    setIsLoading(false)
-
-    document.getElementById('close-service')?.click()
   }
 
   const handleAddTag = async () => {
@@ -94,6 +102,21 @@ export const Drawer = ({ trigger }: DrawerProps) => {
 
     fetchTags()
   }, [setStoredTags])
+
+  useEffect(() => {
+    document.addEventListener('click', function (event) {
+      if (
+        // eslint-disable-next-line
+        // @ts-ignore
+        !tagPopover.current.contains(event.target) &&
+        // eslint-disable-next-line
+        // @ts-ignore
+        !tagButton.current.contains(event.target)
+      ) {
+        setOpen(false)
+      }
+    })
+  }, [])
 
   return (
     <Sheet>
@@ -150,68 +173,71 @@ export const Drawer = ({ trigger }: DrawerProps) => {
             />
           </div>
 
-          <div className="flex flex-col items-start gap-1">
+          <div className="flex flex-col items-start gap-1 relative">
             <Label className="text-right">Tags</Label>
 
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={open}
-                  className="w-full justify-between"
-                >
-                  {tagsSerch.length > 0
-                    ? tagsSerch
-                        .map((tag) => tags.find((t) => t.id === tag)?.name)
-                        .join(', ')
-                    : 'Selecione as tags'}
-                  <ChevronsUpDown className="opacity-50" />
-                </Button>
-              </PopoverTrigger>
+            <Button
+              variant="outline"
+              role="combobox"
+              onClick={() => setTimeout(() => setOpen(true), 10)}
+              className="w-full justify-between"
+              ref={tagButton}
+            >
+              {tagsSerch.length > 0
+                ? tagsSerch
+                    .map((tag) => tags.find((t) => t.id === tag)?.name)
+                    .join(', ')
+                : 'Selecione as tags'}
+              <ChevronsUpDown className="opacity-50" />
+            </Button>
 
-              <PopoverContent className="w-[335px] p-0 bg-white">
-                <div className="flex items-center p-1">
-                  <Input
-                    id="tags-search"
-                    placeholder='Ex: "Lavagem de carro"'
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
-                  />
+            <div
+              className={`max-h-44 h-auto w-full top-14 absolute border-2 border-gray-500 bg-white transition-opacity duration-300 ease-in-out animate-fade-in ${
+                !open && 'hidden opacity-0'
+              }`}
+              ref={tagPopover}
+            >
+              <div className="flex items-center p-1">
+                <Input
+                  id="tags-search"
+                  placeholder='Ex: "Lavagem de carro"'
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
+                  className="z-50"
+                />
 
-                  {formattedTags.filter((tag) => tag.label.includes(search))
-                    .length == 0 && (
-                    <Button
-                      className="bg-sky-800 hover:bg-sky-900 text-gray-200 flex gap-1 items-center"
-                      onClick={handleAddTag}
+                {formattedTags.filter((tag) => tag.label.includes(search))
+                  .length == 0 && (
+                  <Button
+                    className="bg-sky-800 hover:bg-sky-900 text-gray-200 flex gap-1 items-center"
+                    onClick={handleAddTag}
+                  >
+                    <Plus color="#e5e7eb" size={18} strokeWidth={2} />
+                  </Button>
+                )}
+              </div>
+
+              <div className="flex flex-col">
+                {formattedTags
+                  .filter((tag) => tag.label.includes(search))
+                  .map((tag) => (
+                    <div
+                      key={tag.value}
+                      className="cursor-pointer p-2 hover:bg-gray-200"
+                      onClick={() =>
+                        tagsSerch.includes(tag.value)
+                          ? setTagsSerch(
+                              tagsSerch.filter((t) => t !== tag.value)
+                            )
+                          : setTagsSerch([...tagsSerch, tag.value])
+                      }
                     >
-                      <Plus color="#e5e7eb" size={18} strokeWidth={2} />
-                    </Button>
-                  )}
-                </div>
-
-                <div className="flex flex-col">
-                  {formattedTags
-                    .filter((tag) => tag.label.includes(search))
-                    .map((tag) => (
-                      <div
-                        key={tag.value}
-                        className="cursor-pointer p-2 hover:bg-gray-200"
-                        onClick={() =>
-                          tagsSerch.includes(tag.value)
-                            ? setTagsSerch(
-                                tagsSerch.filter((t) => t !== tag.value)
-                              )
-                            : setTagsSerch([...tagsSerch, tag.value])
-                        }
-                      >
-                        {tag.label}
-                      </div>
-                    ))}
-                </div>
-              </PopoverContent>
-            </Popover>
+                      {tag.label}
+                    </div>
+                  ))}
+              </div>
+            </div>
           </div>
         </div>
         <SheetFooter>

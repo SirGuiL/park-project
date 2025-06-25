@@ -1,13 +1,10 @@
 import { ReactNode, createContext, useState } from 'react'
-import { v4 as uuid } from 'uuid'
 
 import { serviceType } from '../DTOs/service'
 
-type createServiceProps = Omit<serviceType, 'id' | 'created_at'>
-
 export type ServicesContextProps = {
   services: serviceType[]
-  createService: (service: createServiceProps) => void
+  createService: (service: serviceType) => void
 }
 
 type ServicesContextProviderProps = {
@@ -23,14 +20,8 @@ export function ServicesContextProvider({
 }: ServicesContextProviderProps) {
   const [services, setServices] = useState<serviceType[]>([])
 
-  const createService = (service: createServiceProps) => {
-    const serviceWithId: serviceType = {
-      id: uuid(),
-      ...service,
-      created_at: new Date(),
-    }
-
-    setServices([...services, serviceWithId])
+  const createService = (service: serviceType) => {
+    setServices([...services, service])
   }
 
   return (

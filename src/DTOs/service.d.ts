@@ -5,6 +5,6 @@ export interface serviceType {
   name: string
   amount: number
   tags: tagType[]
-  created_at: Date
-  updated_at?: Date
+  createdAt: Date
+  updatedAt?: Date
 }

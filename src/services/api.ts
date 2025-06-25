@@ -47,6 +47,11 @@ api.interceptors.response.use(
       }
     }
 
+    if (status === 401 && !nonAuthRoutes.includes(window.location.pathname)) {
+      window.location.href = '/entrar'
+      return Promise.reject(err)
+    }
+
     throw err
   }
 )
