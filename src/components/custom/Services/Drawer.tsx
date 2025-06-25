@@ -107,6 +107,8 @@ export const Drawer = ({ trigger }: DrawerProps) => {
 
   useEffect(() => {
     document.addEventListener('click', function (event) {
+      if (!tagPopover.current || !tagButton.current) return
+
       if (
         // eslint-disable-next-line
         // @ts-ignore
