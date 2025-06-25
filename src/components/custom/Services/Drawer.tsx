@@ -134,6 +134,7 @@ export const Drawer = ({ trigger }: DrawerProps) => {
           </Button>
         )}
       </SheetTrigger>
+
       <SheetContent className="bg-white">
         <SheetHeader>
           <SheetTitle>Adicionar novo serviço</SheetTitle>
@@ -182,21 +183,22 @@ export const Drawer = ({ trigger }: DrawerProps) => {
 
             <Button
               variant="outline"
-              role="combobox"
               onClick={() => setTimeout(() => setOpen(true), 10)}
               className="w-full justify-between"
               ref={tagButton}
             >
-              {tagsSerch.length > 0
-                ? tagsSerch
-                    .map((tag) => tags.find((t) => t.id === tag)?.name)
-                    .join(', ')
-                : 'Selecione as tags'}
+              <span className="text-sm font-normal">
+                {tagsSerch.length > 0
+                  ? tagsSerch
+                      .map((tag) => tags.find((t) => t.id === tag)?.name)
+                      .join(', ')
+                  : 'Selecione as tags'}
+              </span>
               <ChevronsUpDown className="opacity-50" />
             </Button>
 
             <div
-              className={`max-h-44 h-auto w-full top-14 absolute border-2 border-gray-500 bg-white transition-opacity duration-300 ease-in-out animate-fade-in ${
+              className={`max-h-44 h-auto w-full top-14 absolute border-[1px] border-gray-200 bg-white transition-opacity duration-300 ease-in-out animate-fade-in ${
                 !open && 'hidden opacity-0'
               }`}
               ref={tagPopover}
@@ -244,10 +246,11 @@ export const Drawer = ({ trigger }: DrawerProps) => {
             </div>
           </div>
         </div>
+
         <SheetFooter>
           <SheetClose asChild>
             <Button
-              className="text-gray-900 hover:bg-gray-200 rounded-full flex gap-1 items-center"
+              className="text-gray-900 bg-white hover:bg-gray-200 rounded-full flex gap-1 items-center"
               id="close-service"
             >
               Cancelar

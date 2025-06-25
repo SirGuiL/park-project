@@ -8,6 +8,12 @@ type createProps = {
   role?: 'ADMIN' | 'USER'
 }
 
+type updateProps = {
+  id: string
+  name: string
+  email: string
+}
+
 export class UserService {
   static async create(props: createProps) {
     return await api.post('/users', props)
@@ -15,5 +21,11 @@ export class UserService {
 
   static async get() {
     return await api.get('/users')
+  }
+
+  static async update(props: updateProps) {
+    const { email, name, id } = props
+
+    return await api.put(`/users/${id}`, { email, name })
   }
 }

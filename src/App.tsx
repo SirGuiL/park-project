@@ -9,73 +9,69 @@ import { Home } from './pages/Home'
 import { Services } from './pages/Services'
 import { SignIn } from './pages/SignIn'
 import { SignUp } from './pages/SignUp'
+import { Settings } from './pages/Settings'
 
 import { SidebarContextProvider } from './contexts/SidebarContext'
-import { TodaysHistoryContextProvider } from './contexts/TodaysHistoryContext'
-import { PreferencesContextProvider } from './contexts/PreferencesContext'
-import { ServicesContextProvider } from './contexts/ServicesContext'
-import { TagsContextProvider } from './contexts/TagsContext'
 
+import { useUser } from './hooks/useUser'
 import { useSidebar } from './hooks/useSidebar'
+
 import { UserService } from './services/UserService'
 import { AccountService } from './services/AccountService'
 
 function App() {
   const { isOpened } = useSidebar()
   const location = useLocation()
+  const { saveStoredUser } = useUser()
 
   const withoutSidebar = ['/cadastro', '/entrar']
 
   useEffect(() => {
-    getUser()
-    getAccount()
-  }, [])
+    const getUser = async () => {
+      try {
+        const response = await UserService.get()
 
-  const getUser = async () => {
-    try {
-      const response = await UserService.get()
-
-      console.log(response.data)
-    } catch (error) {
-      console.error(error)
+        saveStoredUser(response.data)
+        console.log(response.data)
+      } catch (error) {
+        console.error(error)
+      }
     }
-  }
 
-  const getAccount = async () => {
-    try {
-      const response = await AccountService.get()
+    const getAccount = async () => {
+      try {
+        const response = await AccountService.get()
 
-      console.log(response.data)
-    } catch (error) {
-      console.error(error)
+        console.log(response.data)
+      } catch (error) {
+        console.error(error)
+      }
     }
-  }
+
+    setTimeout(() => {
+      getUser()
+      getAccount()
+    }, 100)
+  }, [saveStoredUser])
 
   return (
-    <TagsContextProvider>
-      <ServicesContextProvider>
-        <SidebarProvider open={isOpened}>
-          <PreferencesContextProvider>
-            <TodaysHistoryContextProvider>
-              <SidebarContextProvider>
-                <div className="w-screen h-screen overflow-hidden flex">
-                  {!withoutSidebar.includes(location.pathname) && <Sidebar />}
+    <SidebarProvider open={isOpened}>
+      <SidebarContextProvider>
+        <div className="w-screen h-screen overflow-hidden flex">
+          {!withoutSidebar.includes(location.pathname) && <Sidebar />}
 
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/servicos" element={<Services />} />
-                    <Route path="/cadastro" element={<SignUp />} />
-                    <Route path="/entrar" element={<SignIn />} />
-                  </Routes>
-                </div>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/servicos" element={<Services />} />
+            <Route path="/cadastro" element={<SignUp />} />
+            <Route path="/entrar" element={<SignIn />} />
+            <Route path="/configuracoes" element={<Settings />} />
+          </Routes>
+        </div>
 
-                <Toaster position="top-center" reverseOrder={false} />
-              </SidebarContextProvider>
-            </TodaysHistoryContextProvider>
-          </PreferencesContextProvider>
-        </SidebarProvider>
-      </ServicesContextProvider>
-    </TagsContextProvider>
+        <Toaster position="top-center" reverseOrder={false} />
+      </SidebarContextProvider>
+    </SidebarProvider>
   )
 }
 
