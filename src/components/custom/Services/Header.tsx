@@ -5,10 +5,12 @@ import { useSidebar } from '@/hooks/useSidebar'
 import { useTags } from '@/hooks/useTags'
 
 import { Drawer, TagsDrawer } from '.'
+import { useAccount } from '@/hooks/useAccount'
 
 export const Header = () => {
   const { handleOpenSidebar } = useSidebar()
   const { tags } = useTags()
+  const { account } = useAccount()
 
   return (
     <header className="flex items-center justify-between p-4 bg-gray-800 h-16">
@@ -21,7 +23,7 @@ export const Header = () => {
         </Button>
 
         <h1 className="text-2xl font-bold text-gray-300">
-          Estacionamento e lava rápido
+          {account.name || 'Estacionamento e lava rápido'}
         </h1>
       </div>
 

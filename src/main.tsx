@@ -11,20 +11,23 @@ import { UserContextProvider } from './contexts/UserContext.tsx'
 import { ServicesContextProvider } from './contexts/ServicesContext.tsx'
 import { PreferencesContextProvider } from './contexts/PreferencesContext.tsx'
 import { TodaysHistoryContextProvider } from './contexts/TodaysHistoryContext.tsx'
+import { AccountContextProvider } from './contexts/AccountContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <TagsContextProvider>
-        <UserContextProvider>
-          <ServicesContextProvider>
-            <PreferencesContextProvider>
-              <TodaysHistoryContextProvider>
-                <App />
-              </TodaysHistoryContextProvider>
-            </PreferencesContextProvider>
-          </ServicesContextProvider>
-        </UserContextProvider>
+        <AccountContextProvider>
+          <UserContextProvider>
+            <ServicesContextProvider>
+              <PreferencesContextProvider>
+                <TodaysHistoryContextProvider>
+                  <App />
+                </TodaysHistoryContextProvider>
+              </PreferencesContextProvider>
+            </ServicesContextProvider>
+          </UserContextProvider>
+        </AccountContextProvider>
       </TagsContextProvider>
     </BrowserRouter>
   </StrictMode>

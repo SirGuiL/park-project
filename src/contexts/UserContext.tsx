@@ -20,6 +20,7 @@ export function UserContextProvider({ children }: UserContextProviderProps) {
     name: '',
     email: '',
     role: 'USER',
+    createdAt: new Date(),
   })
 
   const saveStoredUser = useCallback((user: User) => {

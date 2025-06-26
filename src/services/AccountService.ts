@@ -4,6 +4,11 @@ type createProps = {
   name: string
 }
 
+type updateProps = createProps & {
+  id: string
+  cnpj?: string
+}
+
 export class AccountService {
   static async create(props: createProps) {
     return await api.post('/account', props)
@@ -11,5 +16,18 @@ export class AccountService {
 
   static async get() {
     return await api.get('/account')
+  }
+
+  static async update(props: updateProps) {
+    const { id, name, cnpj } = props
+
+    return await api.put(`/account/${id}`, {
+      name,
+      cnpj,
+    })
+  }
+
+  static async getUsers() {
+    return await api.get('/account/users')
   }
 }

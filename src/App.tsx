@@ -18,11 +18,13 @@ import { useSidebar } from './hooks/useSidebar'
 
 import { UserService } from './services/UserService'
 import { AccountService } from './services/AccountService'
+import { useAccount } from './hooks/useAccount'
 
 function App() {
   const { isOpened } = useSidebar()
   const location = useLocation()
   const { saveStoredUser } = useUser()
+  const { saveStoredAccount, saveStoredAccountUsers } = useAccount()
 
   const withoutSidebar = ['/cadastro', '/entrar']
 
@@ -41,6 +43,18 @@ function App() {
       try {
         const response = await AccountService.get()
 
+        saveStoredAccount(response.data)
+        getAccountUsers()
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    const getAccountUsers = async () => {
+      try {
+        const response = await AccountService.getUsers()
+
+        saveStoredAccountUsers(response.data)
         console.log(response.data)
       } catch (error) {
         console.error(error)
@@ -51,7 +65,7 @@ function App() {
       getUser()
       getAccount()
     }, 100)
-  }, [saveStoredUser])
+  }, [saveStoredUser, saveStoredAccount, saveStoredAccountUsers])
 
   return (
     <SidebarProvider open={isOpened}>

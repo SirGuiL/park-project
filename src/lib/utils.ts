@@ -125,3 +125,50 @@ export function isValidPassword(password: string) {
 
   return true
 }
+
+export function verifyCNPJ(string: string) {
+  const cleanCNPJ = string.replace(/[^\d]/g, '')
+
+  if (cleanCNPJ.length !== 14) {
+    return false
+  }
+
+  const allDigits = /^(.)\1+$/.test(cleanCNPJ)
+  if (allDigits) {
+    return false
+  }
+
+  const firstDigitsWeight = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+  const secondDigitsWeight = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+
+  const calculateCheckDigit = (cnpj: string, pesos: number[]) => {
+    let sum = 0
+
+    for (let i = 0; i < pesos.length; i++) {
+      sum += parseInt(cnpj.charAt(i)) * pesos[i]
+    }
+
+    const remainderOfDivision = sum % 11
+    return remainderOfDivision < 2 ? 0 : 11 - remainderOfDivision
+  }
+
+  const verifyFirstDigit = calculateCheckDigit(
+    cleanCNPJ.substring(0, 12),
+    firstDigitsWeight
+  )
+  const verifySecondDigit = calculateCheckDigit(
+    cleanCNPJ.substring(0, 12) + verifyFirstDigit,
+    secondDigitsWeight
+  )
+
+  return (
+    parseInt(cleanCNPJ.charAt(12)) === verifyFirstDigit &&
+    parseInt(cleanCNPJ.charAt(13)) === verifySecondDigit
+  )
+}
+
+export function formatCNPJ(cnpj: string) {
+  const cnpj_regex = /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/
+
+  return cnpj.replace(cnpj_regex, '$1.$2.$3/$4-$5')
+}

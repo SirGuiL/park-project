@@ -1,11 +1,15 @@
 import { Button } from '@/components/ui/button'
-import { useSidebar } from '@/hooks/useSidebar'
 import { Menu, Plus } from 'lucide-react'
-import { RegisterCarDrawer } from '../RegisterCarDrawer/RegisterCarDrawer'
+import { RegisterCarDrawer } from '../RegisterCarDrawer'
+
 import { Drawer } from '../Services'
+
+import { useSidebar } from '@/hooks/useSidebar'
+import { useAccount } from '@/hooks/useAccount'
 
 export const Header = () => {
   const { handleOpenSidebar } = useSidebar()
+  const { account } = useAccount()
 
   return (
     <header className="flex items-center justify-between p-4 bg-gray-800 h-16">
@@ -18,7 +22,7 @@ export const Header = () => {
         </Button>
 
         <h1 className="text-2xl font-bold text-gray-300">
-          Estacionamento e lava rápido
+          {account.name || 'Estacionamento e lava rápido'}
         </h1>
       </div>
 
