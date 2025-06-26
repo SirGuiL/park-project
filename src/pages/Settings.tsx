@@ -10,6 +10,14 @@ import { Badge } from '@/components/ui/badge'
 export const Settings = () => {
   const [selectedStep, setSelectedStep] = useState<'user' | 'account'>('user')
 
+  const updateTwoFactorVerification = (value: boolean) => {
+    console.log(value)
+  }
+
+  const updatePassword = () => {
+    console.log('updatePassword')
+  }
+
   return (
     <div className="flex flex-col flex-1">
       <Header />
@@ -44,7 +52,11 @@ export const Settings = () => {
       </div>
 
       <UserSettings />
-      <UserPreferences />
+
+      <UserPreferences
+        handleUpdateTwoFactor={updateTwoFactorVerification}
+        handleUpdatePassword={updatePassword}
+      />
     </div>
   )
 }

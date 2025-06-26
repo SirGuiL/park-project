@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { UserService } from '@/services/UserService'
 import { LoaderCircle } from 'lucide-react'
+
+import { UserService } from '@/services/UserService'
 import { useUser } from '@/hooks/useUser'
 
 type errorType = {
@@ -68,6 +70,11 @@ export const UserSettings = () => {
     }
   }, [email])
 
+  useEffect(() => {
+    setName(user.name)
+    setEmail(user.email)
+  }, [user.email, user.name])
+
   return (
     <div className="flex flex-col md:flex-row w-full py-8 justify-between p-5 border-b-[1px] border-b-gray-400">
       <div className="flex flex-col">
@@ -109,7 +116,7 @@ export const UserSettings = () => {
         </div>
 
         <Button
-          className="bg-sky-800 hover:bg-sky-900 text-gray-200 rounded-full flex gap-1 items-center self-end w-[70px]"
+          className="bg-sky-800 hover:bg-sky-900 text-gray-200 rounded-sm md:rounded-full flex gap-1 items-center self-end w-full md:w-[70px]"
           disabled={isLoading}
         >
           {isLoading ? (

@@ -32,7 +32,6 @@ function App() {
         const response = await UserService.get()
 
         saveStoredUser(response.data)
-        console.log(response.data)
       } catch (error) {
         console.error(error)
       }
@@ -66,6 +65,7 @@ function App() {
             <Route path="/cadastro" element={<SignUp />} />
             <Route path="/entrar" element={<SignIn />} />
             <Route path="/configuracoes" element={<Settings />} />
+            <Route path="/alterar-senha" element={<Settings />} />
           </Routes>
         </div>
 
