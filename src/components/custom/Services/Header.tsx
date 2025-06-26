@@ -14,7 +14,7 @@ export const Header = () => {
     <header className="flex items-center justify-between p-4 bg-gray-800 h-16">
       <div className="flex items-center gap-2">
         <Button
-          className="flex items-center justify-center hover:bg-gray-700 p-0 w-8 h-8 rounded-full"
+          className="flex items-center justify-center hover:bg-gray-700 p-0 w-8 h-8 rounded-full bg-transparent"
           onClick={handleOpenSidebar}
         >
           <Menu color="#e5e7eb" size={18} strokeWidth={2} />

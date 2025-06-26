@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -9,17 +10,28 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Ellipsis } from 'lucide-react'
-import { Menu } from './Menu'
+import { DeleteServiceDialog, EditServiceDialog, Menu } from '.'
+
 import { serviceType } from '@/DTOs/service'
 import { ServicesService } from '@/services/ServicesService'
 import { useServices } from '@/hooks/useServices'
+import { formatCentsToBRL } from '@/lib/utils'
 
 interface ServicesTableProps {
   services: serviceType[]
 }
 
+type editServiceProps = {
+  amount: number
+  name: string
+}
+
 export const ServicesTable = ({ services }: ServicesTableProps) => {
   const { setStoredServices } = useServices()
+
+  const [deleteDialog, setDeleteDialog] = useState(false)
+  const [updateDialog, setUpdateDialog] = useState(false)
+  const [currentId, setCurrentId] = useState('')
 
   const handleOpenServiceDrawer = () => {
     const serviceDrawer = document.querySelector(
@@ -31,14 +43,39 @@ export const ServicesTable = ({ services }: ServicesTableProps) => {
     }
   }
 
-  const deleteService = async (id: string) => {
+  const deleteService = async () => {
     try {
-      await ServicesService.delete({ id })
+      await ServicesService.delete({ id: currentId })
 
-      fetchServices()
+      await fetchServices()
+      setDeleteDialog(false)
     } catch (error) {
       console.error(error)
     }
+  }
+
+  const openDeleteServiceDialog = (id: string) => {
+    setCurrentId(id)
+    document.getElementById('delete-service-dialog')?.click()
+  }
+
+  const editService = async (props: editServiceProps) => {
+    try {
+      await ServicesService.update({
+        ...props,
+        id: currentId,
+      })
+
+      await fetchServices()
+      setUpdateDialog(false)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const openEditServiceDialog = (id: string) => {
+    setCurrentId(id)
+    document.getElementById('edit-service-dialog')?.click()
   }
 
   const fetchServices = async () => {
@@ -94,12 +131,16 @@ export const ServicesTable = ({ services }: ServicesTableProps) => {
             <TableCell className="text-right">
               <Menu
                 trigger={
-                  <Button variant="secondary" size="icon" className="size-8">
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="size-8 bg-transparent"
+                  >
                     <Ellipsis />
                   </Button>
                 }
-                handleDeleteService={() => deleteService(service.id)}
-                handleEditService={() => {}}
+                handleDeleteService={() => openDeleteServiceDialog(service.id)}
+                handleEditService={() => openEditServiceDialog(service.id)}
               />
             </TableCell>
           </TableRow>
@@ -111,6 +152,29 @@ export const ServicesTable = ({ services }: ServicesTableProps) => {
           <TableCell className="text-right">$2,500.00</TableCell>
         </TableRow> */}
       </TableFooter>
+
+      <DeleteServiceDialog
+        trigger={
+          <Button className="hidden" id="delete-service-dialog"></Button>
+        }
+        handleDeleteService={() => deleteService()}
+        dialogState={deleteDialog}
+        setDialogState={setDeleteDialog}
+      />
+
+      <EditServiceDialog
+        trigger={<Button className="hidden" id="edit-service-dialog"></Button>}
+        handleUpdateService={editService}
+        amount={formatCentsToBRL(
+          Number(
+            (services.find((service) => service.id === currentId)?.amount ||
+              0) * 100
+          )
+        )}
+        name={services.find((service) => service.id === currentId)?.name || ''}
+        dialogState={updateDialog}
+        setDialogState={setUpdateDialog}
+      />
     </Table>
   )
 }

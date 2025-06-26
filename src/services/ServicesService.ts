@@ -6,6 +6,10 @@ type createProps = {
   tags: string[]
 }
 
+type updateProps = Omit<createProps, 'tags'> & {
+  id: string
+}
+
 export class ServicesService {
   static async create(props: createProps) {
     return await api.post('/services', props)
@@ -17,5 +21,11 @@ export class ServicesService {
 
   static async delete({ id }: { id: string }) {
     return await api.delete(`/services/${id}`)
+  }
+
+  static async update(props: updateProps) {
+    const { amount, name, id } = props
+
+    return await api.put(`/services/${id}`, { amount, name })
   }
 }
