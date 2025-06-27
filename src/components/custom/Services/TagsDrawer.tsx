@@ -12,7 +12,7 @@ import {
 import { useTags } from '@/hooks/useTags'
 
 export const TagsDrawer = () => {
-  const { tags, changeTagColor } = useTags()
+  const { tags } = useTags()
 
   return (
     <Sheet>
@@ -36,14 +36,6 @@ export const TagsDrawer = () => {
               className="flex items-center justify-between gap-2"
             >
               <label htmlFor={tag.id}>{tag.name}</label>
-
-              <input
-                className="rounded-full w-10 h-5"
-                type="color"
-                id={tag.id}
-                defaultValue={tag.color}
-                onChange={(e) => changeTagColor(tag.id, e.target.value)}
-              />
             </div>
           ))}
         </div>

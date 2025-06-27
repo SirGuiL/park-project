@@ -42,7 +42,7 @@ export const UserPreferences = (props: UserPreferencesProps) => {
         </form>
       </div>
 
-      <div className="flex flex-row items-center w-full py-8 justify-between p-5 border-b-[1px] border-b-gray-400">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-0 md:items-center w-full py-8 justify-between p-5 border-b-[1px] border-b-gray-400">
         <div className="flex flex-col">
           <h1 className="text-base">Alterar senha</h1>
           <h2 className="text-gray-500 text-sm">
@@ -51,7 +51,7 @@ export const UserPreferences = (props: UserPreferencesProps) => {
         </div>
 
         <form onSubmit={submitUpdatePasswordForm}>
-          <Button>
+          <Button className="w-full md:w-auto">
             <span>Alterar senha</span>
           </Button>
         </form>

@@ -28,4 +28,8 @@ export class UserService {
 
     return await api.put(`/users/${id}`, { email, name })
   }
+
+  static async delete({ id }: { id: string }) {
+    return await api.delete(`/users/${id}`)
+  }
 }

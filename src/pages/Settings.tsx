@@ -10,9 +10,14 @@ import {
 } from '@/components/custom/Settings'
 import { Badge } from '@/components/ui/badge'
 
+import { useAccount } from '@/hooks/useAccount'
+import { AccountService } from '@/services/AccountService'
+
 export const Settings = () => {
   const [selectedStep, setSelectedStep] = useState<'user' | 'account'>('user')
   const [usersDrawerOpen, setUsersDrawerOpen] = useState(false)
+
+  const { saveStoredAccountUsers } = useAccount()
 
   const updateTwoFactorVerification = (value: boolean) => {
     console.log(value)
@@ -20,6 +25,16 @@ export const Settings = () => {
 
   const updatePassword = () => {
     console.log('updatePassword')
+  }
+
+  const fetchUsers = async () => {
+    try {
+      const response = await AccountService.getUsers()
+
+      saveStoredAccountUsers(response.data)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return (
@@ -68,10 +83,14 @@ export const Settings = () => {
         ) : (
           <>
             <AccountSettings />
-            <AccountUsers openUsersDrawer={() => setUsersDrawerOpen(true)} />
+            <AccountUsers
+              openUsersDrawer={() => setUsersDrawerOpen(true)}
+              fetchUsers={fetchUsers}
+            />
             <AddUsersDrawer
               open={usersDrawerOpen}
               onOpenChange={setUsersDrawerOpen}
+              fetchUsers={fetchUsers}
             />
           </>
         )}

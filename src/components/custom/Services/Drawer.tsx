@@ -249,10 +249,7 @@ export const Drawer = ({ trigger }: DrawerProps) => {
 
         <SheetFooter>
           <SheetClose asChild>
-            <Button
-              className="text-gray-900 bg-white hover:bg-gray-200 rounded-full flex gap-1 items-center"
-              id="close-service"
-            >
+            <Button variant="outline" id="close-service">
               Cancelar
             </Button>
           </SheetClose>
@@ -260,7 +257,7 @@ export const Drawer = ({ trigger }: DrawerProps) => {
           {!isLoading ? (
             <Button
               type="submit"
-              className="bg-green-600 hover:bg-green-700 text-gray-200 rounded-full flex gap-1 items-center w-20"
+              className="w-20"
               onClick={() => handleSaveService()}
             >
               Salvar
@@ -268,7 +265,7 @@ export const Drawer = ({ trigger }: DrawerProps) => {
           ) : (
             <Button
               type="submit"
-              className="bg-green-600 hover:bg-green-700 text-gray-200 rounded-full flex gap-1 items-center w-20"
+              className="w-20"
               onClick={() => handleSaveService()}
               disabled
             >

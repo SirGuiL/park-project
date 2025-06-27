@@ -9,17 +9,31 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { useAccount } from '@/hooks/useAccount'
 import { Button } from '@/components/ui/button'
 import { Ellipsis, Plus } from 'lucide-react'
+import { DeleteUserDialog, EditUserDialog, Menu } from '.'
+
+import { useAccount } from '@/hooks/useAccount'
 import { Role } from '@/DTOs/user'
+import { useState } from 'react'
+import { UserService } from '@/services/UserService'
 
 type AccountUsersProps = {
   openUsersDrawer: () => void
+  fetchUsers: () => void
+}
+
+type editUserData = {
+  email: string
+  name: string
 }
 
 export const AccountUsers = (props: AccountUsersProps) => {
-  const { openUsersDrawer } = props
+  const { openUsersDrawer, fetchUsers } = props
+
+  const [selectedId, setSelectedId] = useState('')
+  const [deleteUserDialog, setDeleteUserDialog] = useState(false)
+  const [editUserDialog, setEditUserDialog] = useState(false)
 
   const { accountUsers } = useAccount()
 
@@ -31,6 +45,44 @@ export const AccountUsers = (props: AccountUsersProps) => {
         return 'Usuário'
       default:
         break
+    }
+  }
+
+  const handleEdit = (id: string) => {
+    setSelectedId(id)
+    setEditUserDialog(true)
+  }
+
+  const editUser = async (data: editUserData) => {
+    const { email, name } = data
+    try {
+      await UserService.update({
+        email,
+        name,
+        id: selectedId,
+      })
+    } catch (error) {
+      console.error(error)
+    } finally {
+      fetchUsers()
+    }
+  }
+
+  const handleDelete = (id: string) => {
+    setSelectedId(id)
+    setDeleteUserDialog(true)
+  }
+
+  const deleteUser = async () => {
+    console.log(selectedId)
+    setDeleteUserDialog(false)
+
+    try {
+      await UserService.delete({ id: selectedId })
+    } catch (error) {
+      console.error(error)
+    } finally {
+      fetchUsers()
     }
   }
 
@@ -62,13 +114,19 @@ export const AccountUsers = (props: AccountUsersProps) => {
                   {format(new Date(user.createdAt), 'dd/MM/yyyy')}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="size-8 bg-transparent"
-                  >
-                    <Ellipsis />
-                  </Button>
+                  <Menu
+                    trigger={
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="size-8 bg-transparent"
+                      >
+                        <Ellipsis />
+                      </Button>
+                    }
+                    handleDelete={() => handleDelete(user.id)}
+                    handleEdit={() => handleEdit(user.id)}
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -92,6 +150,20 @@ export const AccountUsers = (props: AccountUsersProps) => {
           </TableFooter>
         </Table>
       </div>
+
+      <DeleteUserDialog
+        dialogState={deleteUserDialog}
+        setDialogState={setDeleteUserDialog}
+        handleDeleteUser={deleteUser}
+      />
+
+      <EditUserDialog
+        dialogState={editUserDialog}
+        setDialogState={setEditUserDialog}
+        handleUpdateUser={editUser}
+        email={accountUsers.find((user) => user.id === selectedId)?.email || ''}
+        name={accountUsers.find((user) => user.id === selectedId)?.name || ''}
+      />
     </div>
   )
 }

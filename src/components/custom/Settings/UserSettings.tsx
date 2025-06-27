@@ -116,7 +116,7 @@ export const UserSettings = () => {
         </div>
 
         <Button
-          className="bg-sky-800 hover:bg-sky-900 text-gray-200 rounded-sm md:rounded-full flex gap-1 items-center self-end w-full md:w-[70px]"
+          className="self-end w-full mt-4 md:mt-0 md:w-[70px]"
           disabled={isLoading}
         >
           {isLoading ? (
