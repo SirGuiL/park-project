@@ -14,7 +14,13 @@ import { Button } from '@/components/ui/button'
 import { Ellipsis, Plus } from 'lucide-react'
 import { Role } from '@/DTOs/user'
 
-export const AccountUsers = () => {
+type AccountUsersProps = {
+  openUsersDrawer: () => void
+}
+
+export const AccountUsers = (props: AccountUsersProps) => {
+  const { openUsersDrawer } = props
+
   const { accountUsers } = useAccount()
 
   const formatRole = (role: Role) => {
@@ -76,7 +82,7 @@ export const AccountUsers = () => {
                 </span>
               </TableCell>
               <TableCell className="text-right">
-                <Button variant="default">
+                <Button variant="default" onClick={() => openUsersDrawer()}>
                   <Plus />
 
                   <span>Novo usuário</span>

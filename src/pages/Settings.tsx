@@ -3,6 +3,7 @@ import { useState } from 'react'
 import {
   AccountSettings,
   AccountUsers,
+  AddUsersDrawer,
   Header,
   UserPreferences,
   UserSettings,
@@ -11,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 
 export const Settings = () => {
   const [selectedStep, setSelectedStep] = useState<'user' | 'account'>('user')
+  const [usersDrawerOpen, setUsersDrawerOpen] = useState(false)
 
   const updateTwoFactorVerification = (value: boolean) => {
     console.log(value)
@@ -66,7 +68,11 @@ export const Settings = () => {
         ) : (
           <>
             <AccountSettings />
-            <AccountUsers />
+            <AccountUsers openUsersDrawer={() => setUsersDrawerOpen(true)} />
+            <AddUsersDrawer
+              open={usersDrawerOpen}
+              onOpenChange={setUsersDrawerOpen}
+            />
           </>
         )}
       </div>
