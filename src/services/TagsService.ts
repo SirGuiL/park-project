@@ -12,4 +12,8 @@ export class TagsService {
   static async create(props: createProps) {
     return await api.post('/tags', props)
   }
+
+  static async delete({ id }: { id: string }) {
+    return await api.delete(`/tags/${id}`)
+  }
 }

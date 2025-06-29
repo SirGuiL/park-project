@@ -11,12 +11,12 @@ import {
 
 interface MenuProps {
   trigger: ReactNode
-  handleDeleteService: () => void
-  handleEditService: () => void
+  handleDeleteTag: () => void
+  handleEditTag: () => void
 }
 
-export const Menu = (props: MenuProps) => {
-  const { handleDeleteService, handleEditService, trigger } = props
+export const TagsMenu = (props: MenuProps) => {
+  const { handleDeleteTag, handleEditTag, trigger } = props
 
   return (
     <DropdownMenu>
@@ -24,19 +24,19 @@ export const Menu = (props: MenuProps) => {
 
       <DropdownMenuContent className="w-56 bg-white" align="end">
         <DropdownMenuGroup>
-          <DropdownMenuItem className="p-0" onClick={handleDeleteService}>
+          <DropdownMenuItem className="p-0" onClick={handleDeleteTag}>
             <div className="cursor-pointer hover:bg-gray-100 flex items-center gap-1 flex-1 p-2">
               <Trash2 className="w-4 h-4" />
 
-              <span className="text-sm">Excluir serviço</span>
+              <span className="text-sm">Excluir tag</span>
             </div>
           </DropdownMenuItem>
 
-          <DropdownMenuItem className="p-0" onClick={handleEditService}>
+          <DropdownMenuItem className="p-0" onClick={handleEditTag}>
             <div className="cursor-pointer hover:bg-gray-100 flex items-center gap-1 flex-1 p-2">
               <Pencil className="w-4 h-4" />
 
-              <span className="text-sm">Editar serviço</span>
+              <span className="text-sm">Editar tag</span>
             </div>
           </DropdownMenuItem>
         </DropdownMenuGroup>
