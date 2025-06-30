@@ -38,7 +38,7 @@ export const Main = () => {
         const response = await ServicesService.fetchAll({ page: 1 })
 
         setStoredServices(response.data.services)
-        setStoredMaxPages(Math.ceil(response.data.count / 10))
+        setStoredMaxPages(Math.ceil(response.data.metadata.count / 10))
       } catch (error) {
         console.error(error)
       }

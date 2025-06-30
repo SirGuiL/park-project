@@ -93,7 +93,7 @@ export const ServicesTable = (props: Props) => {
       const response = await ServicesService.fetchAll({ page: currentPage })
 
       setStoredServices(response.data.services)
-      setStoredMaxPages(Math.ceil(response.data.count / 10))
+      setStoredMaxPages(Math.ceil(response.data.metadata.count / 10))
     } catch (error) {
       console.error(error)
     }

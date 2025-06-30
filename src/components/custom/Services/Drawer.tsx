@@ -70,7 +70,7 @@ export const Drawer = ({ trigger }: DrawerProps) => {
       const response = await ServicesService.fetchAll({ page: 1 })
 
       setStoredServices(response.data.services)
-      setStoredMaxPages(Math.ceil(response.data.count / 10))
+      setStoredMaxPages(Math.ceil(response.data.metadata.count / 10))
     } catch (error) {
       console.error(error)
     }
@@ -96,8 +96,8 @@ export const Drawer = ({ trigger }: DrawerProps) => {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await TagsService.get()
-        setStoredTags(response.data)
+        const response = await TagsService.get({})
+        setStoredTags(response.data.tags)
       } catch (error) {
         console.error(error)
       }
@@ -199,12 +199,12 @@ export const Drawer = ({ trigger }: DrawerProps) => {
             </Button>
 
             <div
-              className={`max-h-44 h-auto w-full top-14 absolute border-[1px] border-gray-200 bg-white transition-opacity duration-300 ease-in-out animate-fade-in ${
+              className={`h-auto w-full top-14 absolute border-[1px] border-gray-200 bg-white transition-opacity duration-300 ease-in-out animate-fade-in ${
                 !open && 'hidden opacity-0'
               }`}
               ref={tagPopover}
             >
-              <div className="flex items-center p-1">
+              <div className="flex items-center p-1 overflow-y-hidden">
                 <Input
                   id="tags-search"
                   placeholder='Ex: "Lavagem de carro"'
@@ -225,7 +225,7 @@ export const Drawer = ({ trigger }: DrawerProps) => {
                 )}
               </div>
 
-              <div className="flex flex-col">
+              <div className="flex max-h-36 flex-col overflow-y-auto">
                 {formattedTags
                   .filter((tag) => tag.label.includes(search))
                   .map((tag) => (

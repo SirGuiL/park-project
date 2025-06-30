@@ -17,6 +17,7 @@ import { useAccount } from '@/hooks/useAccount'
 import { Role } from '@/DTOs/user'
 import { useState } from 'react'
 import { UserService } from '@/services/UserService'
+import { useUser } from '@/hooks/useUser'
 
 type AccountUsersProps = {
   openUsersDrawer: () => void
@@ -36,6 +37,7 @@ export const AccountUsers = (props: AccountUsersProps) => {
   const [editUserDialog, setEditUserDialog] = useState(false)
 
   const { accountUsers } = useAccount()
+  const { user: currentUser } = useUser()
 
   const formatRole = (role: Role) => {
     switch (role) {
@@ -114,19 +116,21 @@ export const AccountUsers = (props: AccountUsersProps) => {
                   {format(new Date(user.createdAt), 'dd/MM/yyyy')}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Menu
-                    trigger={
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="size-8 bg-transparent"
-                      >
-                        <Ellipsis />
-                      </Button>
-                    }
-                    handleDelete={() => handleDelete(user.id)}
-                    handleEdit={() => handleEdit(user.id)}
-                  />
+                  {user.id !== currentUser.id && (
+                    <Menu
+                      trigger={
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          className="size-8 bg-transparent"
+                        >
+                          <Ellipsis />
+                        </Button>
+                      }
+                      handleDelete={() => handleDelete(user.id)}
+                      handleEdit={() => handleEdit(user.id)}
+                    />
+                  )}
                 </TableCell>
               </TableRow>
             ))}
