@@ -36,7 +36,7 @@ export const Drawer = ({ trigger }: DrawerProps) => {
   const tagButton = useRef(null)
 
   const { tags, createTag, setStoredTags } = useTags()
-  const { setStoredServices } = useServices()
+  const { setStoredServices, setStoredMaxPages } = useServices()
 
   const formattedTags = tags.map((tag) => {
     return {
@@ -67,9 +67,10 @@ export const Drawer = ({ trigger }: DrawerProps) => {
 
   const fetchServices = async () => {
     try {
-      const response = await ServicesService.fetchAll()
+      const response = await ServicesService.fetchAll({ page: 1 })
 
-      setStoredServices(response.data)
+      setStoredServices(response.data.services)
+      setStoredMaxPages(Math.ceil(response.data.count / 10))
     } catch (error) {
       console.error(error)
     }

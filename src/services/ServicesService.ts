@@ -15,8 +15,12 @@ export class ServicesService {
     return await api.post('/services', props)
   }
 
-  static async fetchAll() {
-    return await api.get('/services')
+  static async fetchAll({ page = 1 }: { page: number }) {
+    return await api.get('/services', {
+      params: {
+        page,
+      },
+    })
   }
 
   static async delete({ id }: { id: string }) {

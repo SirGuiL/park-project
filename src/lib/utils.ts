@@ -172,3 +172,19 @@ export function formatCNPJ(cnpj: string) {
 
   return cnpj.replace(cnpj_regex, '$1.$2.$3/$4-$5')
 }
+
+type hasCachedPageData = {
+  // eslint-disable-next-line
+  cachedItems: any[]
+  page: number
+  pageSize?: number
+}
+
+export function hasCachedPage(data: hasCachedPageData): boolean {
+  const { cachedItems, page, pageSize = 10 } = data
+
+  const start = (page - 1) * pageSize
+  const end = page * pageSize
+
+  return cachedItems.slice(start, end).length > 0
+}

@@ -27,7 +27,7 @@ export const Header = () => {
         </h1>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {tags.length > 0 && <TagsDrawer />}
         <Drawer />
       </div>
