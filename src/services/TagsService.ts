@@ -4,6 +4,10 @@ type createProps = {
   name: string
 }
 
+type updateProps = createProps & {
+  id: string
+}
+
 export class TagsService {
   static async get({ page = 1 }: { page?: number }) {
     return await api.get('/tags', {
@@ -19,5 +23,9 @@ export class TagsService {
 
   static async delete({ id }: { id: string }) {
     return await api.delete(`/tags/${id}`)
+  }
+
+  static async update({ id, name }: updateProps) {
+    return await api.put(`/tags/${id}`, { name })
   }
 }

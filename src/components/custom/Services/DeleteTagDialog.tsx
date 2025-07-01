@@ -49,6 +49,7 @@ export const DeleteTagDialog = (props: props) => {
                 setIsLoading(true)
                 handleDeleteTag()
               }}
+              disabled={isLoading}
             >
               {isLoading ? (
                 <LoaderCircle className="animate-spin" />

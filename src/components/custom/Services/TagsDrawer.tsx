@@ -1,5 +1,7 @@
-import { ChevronLeft, ChevronRight, Ellipsis, Plus, Tag } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
+import { Ellipsis, Plus, Tag } from 'lucide-react'
+import { EditTagDialog, DeleteTagDialog, CreateTagDialog, TagsMenu } from '.'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -9,23 +11,21 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { useTags } from '@/hooks/useTags'
-import { TagsMenu } from './TagsMenu'
-import { DeleteTagDialog } from './DeleteTagDialog'
-import { useEffect, useState } from 'react'
-import { CreateTagDialog } from './CreateTagDialog'
-import { TagsService } from '@/services/TagsService'
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
   PaginationLink,
 } from '@/components/ui/pagination'
+
+import { useTags } from '@/hooks/useTags'
+import { TagsService } from '@/services/TagsService'
 import { hasCachedPage } from '@/lib/utils'
 
 export const TagsDrawer = () => {
   const [isOpenCreateTagDialog, setIsOpenCreateTagDialog] = useState(false)
   const [isOpenDeleteTagDialog, setIsOpenDeleteTagDialog] = useState(false)
+  const [isOpenEditTagDialog, setIsOpenEditTagDialog] = useState(false)
   const [currentId, setCurrentId] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [maxPages, setMaxPages] = useState(1)
@@ -63,7 +63,25 @@ export const TagsDrawer = () => {
     }
   }
 
-  const handleEditTag = () => {}
+  const handleEditTag = (id: string) => {
+    setCurrentId(id)
+    setIsOpenEditTagDialog(true)
+  }
+
+  const editTag = async ({ name }: { name: string }) => {
+    try {
+      await TagsService.update({
+        id: currentId,
+        name,
+      })
+
+      setCurrentPage(1)
+      await fetchTags(1)
+      setIsOpenEditTagDialog(false)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const handleAddTag = async ({ name }: { name: string }) => {
     try {
@@ -142,58 +160,40 @@ export const TagsDrawer = () => {
                     </Button>
                   }
                   handleDeleteTag={() => handleDeleteTag(tag.id)}
-                  handleEditTag={handleEditTag}
+                  handleEditTag={() => handleEditTag(tag.id)}
                 />
               </div>
             ))}
           </div>
 
           <div className="flex items-center justify-between">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <Button
-                    variant="ghost"
-                    disabled={currentPage === 1}
-                    onClick={() => updatePage(currentPage - 1)}
-                  >
-                    <ChevronLeft />
-                  </Button>
-                </PaginationItem>
+            <div>
+              <Pagination>
+                <PaginationContent>
+                  {currentPage > 1 && (
+                    <PaginationItem
+                      className="cursor-pointer"
+                      onClick={() => updatePage(currentPage - 1)}
+                    >
+                      <PaginationLink>{currentPage - 1}</PaginationLink>
+                    </PaginationItem>
+                  )}
 
-                {currentPage > 1 && (
-                  <PaginationItem
-                    className="cursor-pointer"
-                    onClick={() => updatePage(currentPage - 1)}
-                  >
-                    <PaginationLink>{currentPage - 1}</PaginationLink>
+                  <PaginationItem className="cursor-pointer">
+                    <PaginationLink isActive>{currentPage}</PaginationLink>
                   </PaginationItem>
-                )}
 
-                <PaginationItem className="cursor-pointer">
-                  <PaginationLink isActive>{currentPage}</PaginationLink>
-                </PaginationItem>
-
-                {maxPages > currentPage && (
-                  <PaginationItem
-                    className="cursor-pointer"
-                    onClick={() => updatePage(currentPage + 1)}
-                  >
-                    <PaginationLink>{currentPage + 1}</PaginationLink>
-                  </PaginationItem>
-                )}
-
-                <PaginationItem>
-                  <Button
-                    variant="ghost"
-                    disabled={currentPage === maxPages}
-                    onClick={() => updatePage(currentPage + 1)}
-                  >
-                    <ChevronRight />
-                  </Button>
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                  {maxPages > currentPage && (
+                    <PaginationItem
+                      className="cursor-pointer"
+                      onClick={() => updatePage(currentPage + 1)}
+                    >
+                      <PaginationLink>{currentPage + 1}</PaginationLink>
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
+            </div>
 
             <Button
               className="text-white flex place-self-end"
@@ -216,6 +216,13 @@ export const TagsDrawer = () => {
         dialogState={isOpenCreateTagDialog}
         setDialogState={setIsOpenCreateTagDialog}
         handleCreateTag={handleAddTag}
+      />
+
+      <EditTagDialog
+        dialogState={isOpenEditTagDialog}
+        setDialogState={setIsOpenEditTagDialog}
+        handleEditTag={editTag}
+        name={tags.find((tag) => tag.id === currentId)?.name || ''}
       />
     </Sheet>
   )
