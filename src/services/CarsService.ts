@@ -1,5 +1,13 @@
 import { api } from './api'
 
+type registerParams = {
+  plate: string
+  brandId: string
+  serviceId: string
+  modelCode: string
+  modelName: string
+}
+
 type getParams = {
   page?: number
   limit?: number
@@ -15,6 +23,10 @@ type getCarsFromFipeAPIParams = {
 }
 
 export class CarsService {
+  static async register(params: registerParams) {
+    return api.post('/cars', params)
+  }
+
   static async fetchAll(params: getParams) {
     return api.get('/cars', {
       params,
@@ -29,5 +41,13 @@ export class CarsService {
     return api.get('/cars/fipe', {
       params,
     })
+  }
+
+  static async fetchNotFinishedCars() {
+    return api.get('/cars/not-finished')
+  }
+
+  static async deleteNotFinishedCars({ id }: { id: string }) {
+    return api.delete(`/cars/not-finished/${id}`)
   }
 }

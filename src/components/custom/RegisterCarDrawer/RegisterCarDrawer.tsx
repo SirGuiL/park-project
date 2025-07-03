@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { Check, Plus } from 'lucide-react'
+import { Check, LoaderCircle, Plus } from 'lucide-react'
 
 import { formatCarPlate, isValidCarPlate } from '@/lib/utils'
 
@@ -33,6 +33,8 @@ import { InfiniteScroll } from '../utils'
 import { CarsService } from '@/services/CarsService'
 import { useServices } from '@/hooks/useServices'
 import { ServicesService } from '@/services/ServicesService'
+import toast from 'react-hot-toast'
+import { useTodaysHistory } from '@/hooks/useTodaysHistory'
 
 type FipeType = 'cars' | 'trucks' | 'motorcycles'
 
@@ -47,7 +49,19 @@ type carType = {
   name: string
 }
 
-export function RegisterCarDrawer() {
+type errorType = {
+  plate: string
+  brand: string
+  car: string
+  service: string
+}
+
+type Props = {
+  isOpen: boolean
+  setIsOpen: (state: boolean) => void
+}
+
+export function RegisterCarDrawer({ isOpen, setIsOpen }: Props) {
   const [carPlate, setCarPlate] = useState('')
   const [carPlateQuery, setCarPlateQuery] = useState('')
   const [fipeType, setFipeType] = useState<FipeType>('cars')
@@ -74,11 +88,19 @@ export function RegisterCarDrawer() {
   const [isLoadingServices, setIsLoadingServices] = useState(false)
   const [servicesInput, setServicesInput] = useState('')
   const [servicesQuery, setServicesQuery] = useState('')
+  const [errors, setErrors] = useState<errorType>({
+    brand: '',
+    car: '',
+    plate: '',
+    service: '',
+  })
+  const [isLoading, setIsLoading] = useState(false)
 
   const brandsScroll = useRef<HTMLDivElement>(null)
   const carsScroll = useRef<HTMLDivElement>(null)
   const servicesScroll = useRef<HTMLDivElement>(null)
 
+  const { setStoredCars } = useTodaysHistory()
   const { services, maxPages, setStoredServices, setStoredMaxPages } =
     useServices()
 
@@ -169,6 +191,82 @@ export function RegisterCarDrawer() {
     }
   }
 
+  const handleSubmitForm = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    const { errors } = validateForm()
+
+    if (errors > 0) {
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      await CarsService.register({
+        plate: carPlate,
+        brandId: selectedBrand?.id as string,
+        serviceId: selectedService,
+        modelCode: selectedCar?.code as string,
+        modelName: selectedCar?.name as string,
+      })
+
+      await fetchCarsInService()
+
+      toast.success('Carro registrado com sucesso', {
+        position: 'top-right',
+      })
+    } catch (error) {
+      console.error(error)
+      toast.error('Erro ao cadastrar veiculo', {
+        position: 'top-right',
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const validateForm = () => {
+    let errors = 0
+
+    if (carPlate.trim() === '') {
+      setErrors((prev) => ({ ...prev, plate: 'A placa é obrigatória' }))
+      errors++
+    }
+
+    if (!isValidCarPlate(carPlate)) {
+      setErrors((prev) => ({ ...prev, plate: 'Placa inválida' }))
+      errors++
+    }
+
+    if (!selectedBrand) {
+      setErrors((prev) => ({ ...prev, brand: 'A marca é obrigatória' }))
+      errors++
+    }
+
+    if (!selectedCar) {
+      setErrors((prev) => ({ ...prev, car: 'O veículo é obrigatório' }))
+      errors++
+    }
+
+    if (!selectedService) {
+      setErrors((prev) => ({ ...prev, service: 'O serviço é obrigatório' }))
+      errors++
+    }
+
+    return { errors }
+  }
+
+  const fetchCarsInService = async () => {
+    try {
+      const response = await CarsService.fetchNotFinishedCars()
+
+      setStoredCars(response.data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   useEffect(() => {
     const getCarByPlate = async () => {
       try {
@@ -176,7 +274,14 @@ export function RegisterCarDrawer() {
           plate: carPlateQuery,
         })
 
-        console.log(response.data)
+        setFipeType(response.data.brand.type)
+
+        setSelectedCar({
+          code: response.data.modelCode,
+          name: response.data.modelName,
+        })
+
+        setSelectedBrand(response.data.brand)
       } catch (error) {
         console.error(error)
       }
@@ -190,7 +295,7 @@ export function RegisterCarDrawer() {
   useEffect(() => {
     const handler = setTimeout(() => {
       setCarPlateQuery(carPlate)
-    }, 1500)
+    }, 1000)
 
     return () => {
       clearTimeout(handler)
@@ -311,8 +416,45 @@ export function RegisterCarDrawer() {
     }
   }, [servicesInput])
 
+  useEffect(() => {
+    if (errors.plate == 'A placa é obrigatória' && !isValidCarPlate(carPlate)) {
+      return setErrors((prev) => ({ ...prev, plate: 'Placa inválida' }))
+    }
+
+    if (errors.plate !== '' && isValidCarPlate(carPlate)) {
+      return setErrors((prev) => ({ ...prev, plate: '' }))
+    }
+  }, [carPlate, errors.plate])
+
+  useEffect(() => {
+    if (selectedBrand) {
+      setErrors((prev) => ({ ...prev, brand: '' }))
+    }
+  }, [selectedBrand, errors.brand])
+
+  useEffect(() => {
+    if (selectedCar) {
+      setErrors((prev) => ({ ...prev, car: '' }))
+    }
+  }, [selectedCar, errors.car])
+
+  useEffect(() => {
+    if (selectedService) {
+      setErrors((prev) => ({ ...prev, service: '' }))
+    }
+  }, [selectedService, errors.service])
+
+  useEffect(() => {
+    setCarPlate('')
+    setIsLoading(false)
+    setSelectedBrand(null)
+    setSelectedCar(null)
+    setSelectedService('')
+    setFipeType('cars')
+  }, [isOpen])
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="bg-sky-800 hover:bg-sky-900 text-gray-200 rounded-full flex gap-1 items-center">
           <Plus color="#e5e7eb" size={18} strokeWidth={2} />
@@ -326,7 +468,10 @@ export function RegisterCarDrawer() {
           <DialogTitle>Lançar carro</DialogTitle>
         </DialogHeader>
 
-        <form className="flex flex-col items-start gap-4">
+        <form
+          className="flex flex-col items-start gap-4"
+          onSubmit={handleSubmitForm}
+        >
           <div className="flex flex-col gap-2 w-full">
             <Label htmlFor="plate">Placa</Label>
             <Input
@@ -338,6 +483,9 @@ export function RegisterCarDrawer() {
               value={carPlate}
               onChange={(e) => setCarPlate(e.target.value)}
             />
+            {errors.plate && (
+              <small className="text-red-500">{errors.plate}</small>
+            )}
           </div>
 
           <div className="flex flex-col gap-2 w-full">
@@ -418,6 +566,10 @@ export function RegisterCarDrawer() {
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {errors.brand && (
+              <small className="text-red-500">{errors.brand}</small>
+            )}
           </div>
 
           <div className="flex flex-col gap-2 w-full">
@@ -473,16 +625,18 @@ export function RegisterCarDrawer() {
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {errors.car && <small className="text-red-500">{errors.car}</small>}
           </div>
 
           <div className="flex flex-col gap-2 w-full">
-            <Label htmlFor="car-input">Serviço</Label>
+            <Label htmlFor="service-input">Serviço</Label>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div className="w-full">
                   <Input
-                    id="car-input"
+                    id="service-input"
                     placeholder='Ex: "Lavagem"'
                     value={
                       services.find((service) => service.id === selectedService)
@@ -496,7 +650,7 @@ export function RegisterCarDrawer() {
                 <DropdownMenuLabel>
                   <Input
                     className="placeholder:text-gray-600 placeholder:text-sm placeholder:font-normal"
-                    id="car-input"
+                    id="service-input"
                     value={servicesInput}
                     onChange={(e) => setServicesInput(e.target.value)}
                     placeholder='Ex: "Lavagem"'
@@ -529,18 +683,24 @@ export function RegisterCarDrawer() {
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {errors.service && (
+              <small className="text-red-500">{errors.service}</small>
+            )}
           </div>
-        </form>
 
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline" type="submit" id="cancel-btn">
-              Cancelar
+          <DialogFooter className="flex justify-end self-end mt-4">
+            <DialogClose asChild>
+              <Button variant="outline" type="button" id="cancel-btn">
+                Cancelar
+              </Button>
+            </DialogClose>
+
+            <Button className="w-20" type="submit">
+              {isLoading ? <LoaderCircle className="animate-spin" /> : 'Salvar'}
             </Button>
-          </DialogClose>
-
-          <Button type="submit">Salvar</Button>
-        </DialogFooter>
+          </DialogFooter>
+        </form>
       </DialogContent>
 
       <Toaster />

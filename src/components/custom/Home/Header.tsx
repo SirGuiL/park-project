@@ -6,8 +6,11 @@ import { Drawer } from '../Services'
 
 import { useSidebar } from '@/hooks/useSidebar'
 import { useAccount } from '@/hooks/useAccount'
+import { useState } from 'react'
 
 export const Header = () => {
+  const [isOpen, setIsOpen] = useState(false)
+
   const { handleOpenSidebar } = useSidebar()
   const { account } = useAccount()
 
@@ -37,7 +40,7 @@ export const Header = () => {
           }
         />
 
-        <RegisterCarDrawer />
+        <RegisterCarDrawer isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
     </header>
   )
