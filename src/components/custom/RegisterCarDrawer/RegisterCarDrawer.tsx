@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { Check, Plus } from 'lucide-react'
 
-import { formatCarPlate } from '@/lib/utils'
+import { formatCarPlate, isValidCarPlate } from '@/lib/utils'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -30,6 +30,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { InfiniteScroll } from '../utils'
+import { CarsService } from '@/services/CarsService'
+import { useServices } from '@/hooks/useServices'
+import { ServicesService } from '@/services/ServicesService'
 
 type FipeType = 'cars' | 'trucks' | 'motorcycles'
 
@@ -39,8 +42,14 @@ type brandType = {
   motorcycles: Brand[]
 }
 
+type carType = {
+  code: string
+  name: string
+}
+
 export function RegisterCarDrawer() {
   const [carPlate, setCarPlate] = useState('')
+  const [carPlateQuery, setCarPlateQuery] = useState('')
   const [fipeType, setFipeType] = useState<FipeType>('cars')
   const [isLoadingBrands, setIsLoadingBrands] = useState(false)
   const [brandsPage, setBrandsPage] = useState(1)
@@ -53,8 +62,25 @@ export function RegisterCarDrawer() {
     motorcycles: [],
     trucks: [],
   })
+  const [cars, setCars] = useState<carType[]>([])
+  const [isLoadingCars, setIsLoadingCars] = useState(false)
+  const [carsPage, setCarsPage] = useState(1)
+  const [carsMaxPages, setCarsMaxPages] = useState<number>(1)
+  const [carsInput, setCarsInput] = useState('')
+  const [carsQuery, setCarsQuery] = useState('')
+  const [selectedCar, setSelectedCar] = useState<carType | null>(null)
+  const [selectedService, setSelectedService] = useState('')
+  const [servicesPage, setServicesPage] = useState(1)
+  const [isLoadingServices, setIsLoadingServices] = useState(false)
+  const [servicesInput, setServicesInput] = useState('')
+  const [servicesQuery, setServicesQuery] = useState('')
 
   const brandsScroll = useRef<HTMLDivElement>(null)
+  const carsScroll = useRef<HTMLDivElement>(null)
+  const servicesScroll = useRef<HTMLDivElement>(null)
+
+  const { services, maxPages, setStoredServices, setStoredMaxPages } =
+    useServices()
 
   const searchNewPage = async (page: number) => {
     setBrandsPage(page)
@@ -91,6 +117,85 @@ export function RegisterCarDrawer() {
       setIsLoadingBrands(false)
     }
   }
+
+  const searchNewCarPage = async (page: number) => {
+    setCarsPage(page)
+    setIsLoadingCars(true)
+
+    try {
+      const response = await CarsService.getCarsFromFipeAPI({
+        page: page,
+        query: carsQuery,
+        vehicleType: fipeType,
+        brandId: selectedBrand?.code as string,
+        limit: 10,
+      })
+
+      const totalPages = Math.ceil(
+        response.data.metadata.count / response.data.metadata.limit
+      )
+
+      setBrandsMaxPages(totalPages)
+
+      if (page == 1) {
+        setCars(response.data.cars)
+        return
+      }
+
+      setCars((prev) => [...prev, ...response.data.cars])
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsLoadingCars(false)
+    }
+  }
+
+  const searchNewServicePage = async (page: number) => {
+    setServicesPage(page)
+    setIsLoadingServices(true)
+
+    try {
+      const response = await ServicesService.fetchAll({
+        page,
+        query: servicesQuery,
+      })
+
+      setStoredServices([...services, ...response.data.services])
+      setStoredMaxPages(Math.ceil(response.data.metadata.count / 10))
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsLoadingServices(false)
+    }
+  }
+
+  useEffect(() => {
+    const getCarByPlate = async () => {
+      try {
+        const response = await CarsService.findUniqueByPlate({
+          plate: carPlateQuery,
+        })
+
+        console.log(response.data)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    if (isValidCarPlate(carPlateQuery)) {
+      getCarByPlate()
+    }
+  }, [carPlateQuery])
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setCarPlateQuery(carPlate)
+    }, 1500)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [carPlate])
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -132,6 +237,79 @@ export function RegisterCarDrawer() {
       clearTimeout(handler)
     }
   }, [brandsInput])
+
+  useEffect(() => {
+    const fetchCarsFromBrand = async () => {
+      setCarsPage(1)
+      setIsLoadingCars(true)
+
+      try {
+        const response = await CarsService.getCarsFromFipeAPI({
+          brandId: selectedBrand?.code as string,
+          vehicleType: fipeType,
+          query: carsQuery,
+          limit: 10,
+          page: 1,
+        })
+
+        const totalPages = Math.ceil(
+          response.data.metadata.count / response.data.metadata.limit
+        )
+
+        setCarsMaxPages(totalPages)
+        setCars(response.data.cars)
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setIsLoadingCars(false)
+      }
+    }
+
+    fetchCarsFromBrand()
+  }, [selectedBrand, fipeType, carsQuery])
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setCarsQuery(carsInput)
+    }, 1500)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [carsInput])
+
+  useEffect(() => {
+    setServicesPage(1)
+    setIsLoadingServices(true)
+
+    const fetchServices = async () => {
+      try {
+        const response = await ServicesService.fetchAll({
+          page: 1,
+          query: servicesQuery,
+        })
+
+        setStoredServices(response.data.services)
+        setStoredMaxPages(Math.ceil(response.data.metadata.count / 10))
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setIsLoadingServices(false)
+      }
+    }
+
+    fetchServices()
+  }, [servicesQuery, setStoredServices, setStoredMaxPages])
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setServicesQuery(servicesInput)
+    }, 1500)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [servicesInput])
 
   return (
     <Dialog>
@@ -214,7 +392,7 @@ export function RegisterCarDrawer() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup
-                  className="max-h-[300px] overflow-y-auto"
+                  className="max-h-[200px] overflow-y-auto"
                   ref={brandsScroll}
                 >
                   <InfiniteScroll
@@ -234,6 +412,117 @@ export function RegisterCarDrawer() {
                         {selectedBrand?.id === brand.id && (
                           <Check size={18} strokeWidth={2} />
                         )}
+                      </div>
+                    ))}
+                  </InfiniteScroll>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="flex flex-col gap-2 w-full">
+            <Label htmlFor="car-input">Carro</Label>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger disabled={!selectedBrand} asChild>
+                <div className="w-full">
+                  <Input
+                    id="car-input"
+                    placeholder='Ex: "Focus"'
+                    value={selectedCar?.name}
+                    disabled={!selectedBrand}
+                    readOnly
+                  />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white w-[375px]">
+                <DropdownMenuLabel>
+                  <Input
+                    className="placeholder:text-gray-600 placeholder:text-sm placeholder:font-normal"
+                    id="car-input"
+                    value={carsInput}
+                    onChange={(e) => setCarsInput(e.target.value)}
+                    placeholder='Ex: "Focus"'
+                  />
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup
+                  className="max-h-[200px] overflow-y-auto"
+                  ref={carsScroll}
+                >
+                  <InfiniteScroll
+                    hasMore={carsPage < carsMaxPages}
+                    next={() => searchNewCarPage(carsPage + 1)}
+                    isLoading={isLoadingCars}
+                    root={carsScroll.current}
+                  >
+                    {cars.map((car) => (
+                      <div
+                        className="flex px-4 py-1 items-center justify-between cursor-pointer hover:bg-gray-100"
+                        onClick={() => setSelectedCar(car)}
+                        key={car.code}
+                      >
+                        <span>{car.name}</span>
+
+                        {selectedCar?.code === car.code && (
+                          <Check size={18} strokeWidth={2} />
+                        )}
+                      </div>
+                    ))}
+                  </InfiniteScroll>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="flex flex-col gap-2 w-full">
+            <Label htmlFor="car-input">Serviço</Label>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="w-full">
+                  <Input
+                    id="car-input"
+                    placeholder='Ex: "Lavagem"'
+                    value={
+                      services.find((service) => service.id === selectedService)
+                        ?.name || ''
+                    }
+                    readOnly
+                  />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white w-[375px]">
+                <DropdownMenuLabel>
+                  <Input
+                    className="placeholder:text-gray-600 placeholder:text-sm placeholder:font-normal"
+                    id="car-input"
+                    value={servicesInput}
+                    onChange={(e) => setServicesInput(e.target.value)}
+                    placeholder='Ex: "Lavagem"'
+                  />
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup
+                  className="max-h-[200px] overflow-y-auto"
+                  ref={servicesScroll}
+                >
+                  <InfiniteScroll
+                    hasMore={servicesPage < maxPages}
+                    next={() => searchNewServicePage(servicesPage + 1)}
+                    isLoading={isLoadingServices}
+                    root={servicesScroll.current}
+                  >
+                    {services.map((service) => (
+                      <div
+                        className="flex px-4 py-1 items-center justify-between cursor-pointer hover:bg-gray-100"
+                        onClick={() => setSelectedService(service.id)}
+                        key={service.id}
+                      >
+                        <span>{service.name}</span>
+
+                        {services.find((s) => s.id === selectedService)?.id ===
+                          service.id && <Check size={18} strokeWidth={2} />}
                       </div>
                     ))}
                   </InfiniteScroll>

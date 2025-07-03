@@ -15,10 +15,11 @@ export class ServicesService {
     return await api.post('/services', props)
   }
 
-  static async fetchAll({ page = 1 }: { page: number }) {
+  static async fetchAll({ page = 1, query }: { page: number; query?: string }) {
     return await api.get('/services', {
       params: {
         page,
+        query,
       },
     })
   }
