@@ -22,6 +22,12 @@ type getCarsFromFipeAPIParams = {
   vehicleType: string
 }
 
+type fetchNotFinishedCarsParams = {
+  page?: number
+  limit?: number
+  query?: string
+}
+
 export class CarsService {
   static async register(params: registerParams) {
     return api.post('/cars', params)
@@ -43,8 +49,10 @@ export class CarsService {
     })
   }
 
-  static async fetchNotFinishedCars() {
-    return api.get('/cars/not-finished')
+  static async fetchNotFinishedCars(params: fetchNotFinishedCarsParams) {
+    return api.get('/cars/not-finished', {
+      params,
+    })
   }
 
   static async deleteNotFinishedCars({ id }: { id: string }) {

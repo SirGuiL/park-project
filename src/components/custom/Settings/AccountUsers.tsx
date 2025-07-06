@@ -76,7 +76,6 @@ export const AccountUsers = (props: AccountUsersProps) => {
   }
 
   const deleteUser = async () => {
-    console.log(selectedId)
     setDeleteUserDialog(false)
 
     try {

@@ -5,16 +5,21 @@ import { Input } from '@/components/ui/input'
 import { Link } from 'react-router-dom'
 
 import { HistoryTable, ChargeServiceDialog, DeleteCarInServiceDialog } from '.'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CarsService } from '@/services/CarsService'
+import { HistoryTablePagination } from './HistoryTablePagination'
 
 export const Main = () => {
   const [isOpenChargeDialog, setIsOpenChargeDialog] = useState(false)
   const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false)
   const [currentId, setCurrentId] = useState('')
+  const [inputSearch, setInputSearch] = useState('')
 
   const { numberOfVacancies } = usePreferences()
-  const { search, setSearch, cars, setStoredCars } = useTodaysHistory()
+  const { search, setSearch, cars, setStoredCars, page, maxPages } =
+    useTodaysHistory()
+
+  const paginatedCars = cars.slice((page - 1) * 10, page * 10)
 
   const handleOpenChargeDialog = (id: string) => {
     setCurrentId(id)
@@ -40,13 +45,102 @@ export const Main = () => {
 
   const fetchAllRegisters = async () => {
     try {
-      const response = await CarsService.fetchNotFinishedCars()
+      const response = await CarsService.fetchNotFinishedCars({
+        page: 1,
+        limit: 10,
+        query: search,
+      })
 
-      setStoredCars(response.data)
+      setStoredCars({
+        cars: response.data.carsServices,
+        page: 1,
+        totalItems: response.data.metadata.count,
+      })
     } catch (error) {
       console.error(error)
     }
   }
+
+  const serachNewPage = async (page: number) => {
+    try {
+      const response = await CarsService.fetchNotFinishedCars({
+        page,
+        limit: 10,
+        query: search,
+      })
+
+      if (page == 1) {
+        setStoredCars({
+          cars: response.data.carsServices,
+          page,
+          totalItems: response.data.metadata.count,
+        })
+        return
+      }
+
+      setStoredCars({
+        cars: cars.concat(response.data.carsServices),
+        page,
+        totalItems: response.data.metadata.count,
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    const fetchAllCars = async () => {
+      try {
+        const response = await CarsService.fetchNotFinishedCars({
+          page: 1,
+          limit: 10,
+          query: '',
+        })
+
+        setStoredCars({
+          cars: response.data.carsServices,
+          page: 1,
+          totalItems: response.data.metadata.count,
+        })
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchAllCars()
+  }, [setStoredCars])
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearch(inputSearch)
+    }, 1500)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [inputSearch, setSearch])
+
+  useEffect(() => {
+    const fetchAllRegisters = async () => {
+      try {
+        const response = await CarsService.fetchNotFinishedCars({
+          page: 1,
+          limit: 10,
+          query: search,
+        })
+
+        setStoredCars({
+          cars: response.data.carsServices,
+          page: 1,
+          totalItems: response.data.metadata.count,
+        })
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchAllRegisters()
+  }, [search, setStoredCars])
 
   return (
     <main className="flex flex-1 py-2 px-4">
@@ -57,15 +151,15 @@ export const Main = () => {
               type="email"
               placeholder="Busque pelo nome do carro..."
               className="rounded-xl"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={inputSearch}
+              onChange={(e) => setInputSearch(e.target.value)}
             />
           </div>
 
-          <div className="px-4 py-2">
-            {cars.length > 0 ? (
+          <div className="px-4 py-2 flex flex-col">
+            {paginatedCars.length > 0 ? (
               <HistoryTable
-                carsInService={cars}
+                carsInService={paginatedCars}
                 openChargeModal={handleOpenChargeDialog}
                 openDeleteModal={handleOpenDeleteDialog}
               />
@@ -73,6 +167,14 @@ export const Main = () => {
               <span className="text-gray-600 text-sm">
                 Nenhum carro registrado até o momento
               </span>
+            )}
+
+            {maxPages > 1 && (
+              <HistoryTablePagination
+                currentPage={page}
+                setCurrentPage={serachNewPage}
+                maxPages={maxPages}
+              />
             )}
           </div>
         </div>

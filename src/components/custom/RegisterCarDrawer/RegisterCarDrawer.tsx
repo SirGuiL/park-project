@@ -222,7 +222,7 @@ export function RegisterCarDrawer({ isOpen, setIsOpen }: Props) {
         position: 'top-right',
       })
     } finally {
-      setIsLoading(false)
+      setIsOpen(false)
     }
   }
 
@@ -259,9 +259,17 @@ export function RegisterCarDrawer({ isOpen, setIsOpen }: Props) {
 
   const fetchCarsInService = async () => {
     try {
-      const response = await CarsService.fetchNotFinishedCars()
+      const response = await CarsService.fetchNotFinishedCars({
+        page: 1,
+        limit: 10,
+        query: '',
+      })
 
-      setStoredCars(response.data)
+      setStoredCars({
+        cars: response.data.carsServices,
+        page: 1,
+        totalItems: response.data.metadata.count,
+      })
     } catch (error) {
       console.error(error)
     }

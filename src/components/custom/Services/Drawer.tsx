@@ -82,7 +82,6 @@ export const Drawer = ({ trigger }: DrawerProps) => {
         name: search,
       })
 
-      console.log(response.data)
       createTag({
         id: response.data.id,
         name: response.data.name,
