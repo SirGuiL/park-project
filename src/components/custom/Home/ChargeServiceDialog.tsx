@@ -1,7 +1,9 @@
-import { FormEvent, useState } from 'react'
-import PixIcon from '../icons/pix.svg'
+import { FormEvent, useEffect, useState } from 'react'
+import { differenceInMinutes } from 'date-fns'
 
+import PixIcon from '../icons/pix.svg'
 import { Banknote, CreditCard, LoaderCircle } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -15,11 +17,13 @@ import {
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Input } from '@/components/ui/input'
+
 import { formatCentsToBRL } from '@/lib/utils'
 
 type Props = {
   isOpen: boolean
   setIsOpen: (state: boolean) => void
+  createdAt: Date
 }
 
 type paymentMethod = 'credit' | 'debit' | 'pix' | 'cash'
@@ -29,11 +33,14 @@ type errorType = {
   value: string
 }
 
-export const ChargeServiceDialog = ({ isOpen, setIsOpen }: Props) => {
+export const ChargeServiceDialog = (props: Props) => {
+  const { createdAt, isOpen, setIsOpen } = props
+
   const [isLoading, setIsLoading] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<paymentMethod>('pix')
   const [valueMethod, setValueMethod] = useState<valueMethod>('hour')
   const [value, setValue] = useState('R$ 0,00')
+  const [totalValue, setTotalValue] = useState('R$ 0,00')
   const [errors, setErrors] = useState<errorType>({ value: '' })
 
   const handleSubmitForm = (e: FormEvent<HTMLFormElement>) => {
@@ -41,6 +48,33 @@ export const ChargeServiceDialog = ({ isOpen, setIsOpen }: Props) => {
 
     setErrors({ value: '' })
   }
+
+  useEffect(() => {
+    if (valueMethod === 'day') {
+      const diff = differenceInMinutes(new Date(), createdAt)
+      const differenceInHours = diff / 60
+      const differenceInDays = Math.ceil(differenceInHours / 24)
+
+      const valueInCents = Number(
+        value.replace(',', '.').replace(/[^\d.]/g, '')
+      )
+
+      setTotalValue(formatCentsToBRL(differenceInDays * (valueInCents * 100)))
+      return
+    }
+
+    if (valueMethod === 'hour') {
+      const diff = differenceInMinutes(new Date(), createdAt)
+      const differenceInHours = Math.ceil(diff / 60)
+
+      const valueInCents = Number(
+        value.replace(',', '.').replace(/[^\d.]/g, '')
+      )
+
+      setTotalValue(formatCentsToBRL(differenceInHours * (valueInCents * 100)))
+      return
+    }
+  }, [value, valueMethod, createdAt])
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -124,26 +158,63 @@ export const ChargeServiceDialog = ({ isOpen, setIsOpen }: Props) => {
               </RadioGroup>
             </div>
 
-            <div className="flex flex-col gap-1">
-              <Label htmlFor="name">Valor</Label>
-              <Input
-                type="text"
-                name="name"
-                id="name"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                onInput={(e) => {
-                  ;(e.target as HTMLInputElement).value = formatCentsToBRL(
-                    Number(
-                      (e.target as HTMLInputElement).value.replace(/[^\d]/g, '')
-                    )
-                  )
-                }}
-                disabled={valueMethod !== 'precision'}
-              />
-              {errors.value && (
-                <small className="text-red-500">{errors.value}</small>
+            <div className="flex flex-row gap-4">
+              {valueMethod !== 'precision' && (
+                <div className="flex flex-col gap-1">
+                  <Label htmlFor="name">
+                    Valor {valueMethod === 'day' ? 'dia' : 'hora'}
+                  </Label>
+                  <Input
+                    type="text"
+                    name="name"
+                    id="name"
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
+                    onInput={(e) => {
+                      ;(e.target as HTMLInputElement).value = formatCentsToBRL(
+                        Number(
+                          (e.target as HTMLInputElement).value.replace(
+                            /[^\d]/g,
+                            ''
+                          )
+                        )
+                      )
+                    }}
+                  />
+                  {errors.value && (
+                    <small className="text-red-500">{errors.value}</small>
+                  )}
+                </div>
               )}
+
+              <div
+                className={`flex flex-col gap-1 ${
+                  valueMethod === 'precision' ? 'w-full' : ''
+                }`}
+              >
+                <Label htmlFor="name">Valor total</Label>
+                <Input
+                  type="text"
+                  name="name"
+                  id="name"
+                  value={totalValue}
+                  onChange={(e) => setTotalValue(e.target.value)}
+                  onInput={(e) => {
+                    ;(e.target as HTMLInputElement).value = formatCentsToBRL(
+                      Number(
+                        (e.target as HTMLInputElement).value.replace(
+                          /[^\d]/g,
+                          ''
+                        )
+                      )
+                    )
+                  }}
+                  disabled={valueMethod !== 'precision'}
+                />
+                {errors.value && (
+                  <small className="text-red-500">{errors.value}</small>
+                )}
+              </div>
             </div>
 
             <DialogFooter>
