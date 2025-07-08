@@ -8,7 +8,6 @@ import { HistoryTable, ChargeServiceDialog, DeleteCarInServiceDialog } from '.'
 import { useEffect, useState } from 'react'
 import { CarsService } from '@/services/CarsService'
 import { HistoryTablePagination } from './HistoryTablePagination'
-import { carsInService } from '@/DTOs/car'
 
 export const Main = () => {
   const [isOpenChargeDialog, setIsOpenChargeDialog] = useState(false)
@@ -205,9 +204,7 @@ export const Main = () => {
       <ChargeServiceDialog
         isOpen={isOpenChargeDialog}
         setIsOpen={(value: boolean) => setIsOpenChargeDialog(value)}
-        createdAt={
-          (cars.find((car) => car.id === currentId) as carsInService).createdAt
-        }
+        createdAt={cars.find((car) => car.id === currentId)?.createdAt as Date}
       />
 
       <DeleteCarInServiceDialog
