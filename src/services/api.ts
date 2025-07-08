@@ -27,7 +27,8 @@ api.interceptors.response.use(
     if (
       status === 401 &&
       !originalRequest._retry &&
-      !nonAuthRoutes.includes(window.location.pathname)
+      !nonAuthRoutes.includes(window.location.pathname) &&
+      !window.location.pathname.includes('/nova-senha')
     ) {
       originalRequest._retry = true
 
@@ -47,7 +48,11 @@ api.interceptors.response.use(
       }
     }
 
-    if (status === 401 && !nonAuthRoutes.includes(window.location.pathname)) {
+    if (
+      status === 401 &&
+      !nonAuthRoutes.includes(window.location.pathname) &&
+      !window.location.pathname.includes('/nova-senha')
+    ) {
       window.location.href = '/entrar'
       return Promise.reject(err)
     }

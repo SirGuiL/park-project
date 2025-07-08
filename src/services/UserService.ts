@@ -14,6 +14,11 @@ type updateProps = {
   email: string
 }
 
+type updatePasswordProps = {
+  id: string
+  password: string
+}
+
 export class UserService {
   static async create(props: createProps) {
     return await api.post('/users', props)
@@ -31,5 +36,25 @@ export class UserService {
 
   static async delete({ id }: { id: string }) {
     return await api.delete(`/users/${id}`)
+  }
+
+  static async updatePassword({ id, password }: updatePasswordProps) {
+    return await api.patch(`/users/${id}/password`, { password })
+  }
+
+  static async inactive({ id }: { id: string }) {
+    return await api.patch(`/users/${id}/deactivate`)
+  }
+
+  static async sendUpdatePasswordLink() {
+    return await api.post(
+      '/users/forgot-password',
+      {},
+      {
+        headers: {
+          'X-Frontend-URL': window.location.origin,
+        },
+      }
+    )
   }
 }

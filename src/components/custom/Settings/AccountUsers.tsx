@@ -128,6 +128,11 @@ export const AccountUsers = (props: AccountUsersProps) => {
                       }
                       handleDelete={() => handleDelete(user.id)}
                       handleEdit={() => handleEdit(user.id)}
+                      copyUpdatePasswordLink={() => {
+                        navigator.clipboard.writeText(
+                          `${window.location.origin}/nova-senha/${user.id}`
+                        )
+                      }}
                     />
                   )}
                 </TableCell>

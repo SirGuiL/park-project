@@ -296,10 +296,7 @@ export const SignUpForm = () => {
         </div>
 
         <div className="flex flex-col w-full gap-2">
-          <Button
-            type="submit"
-            className="bg-sky-800 hover:bg-sky-900 text-gray-200 rounded-lg h-12 flex gap-1 items-center mt-1"
-          >
+          <Button type="submit">
             <span>Criar conta</span>
           </Button>
 

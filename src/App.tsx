@@ -19,6 +19,7 @@ import { useSidebar } from './hooks/useSidebar'
 import { UserService } from './services/UserService'
 import { AccountService } from './services/AccountService'
 import { useAccount } from './hooks/useAccount'
+import { CreatePassword } from './pages/CreatePassword'
 
 function App() {
   const { isOpened } = useSidebar()
@@ -70,7 +71,8 @@ function App() {
     <SidebarProvider open={isOpened}>
       <SidebarContextProvider>
         <div className="w-screen h-screen overflow-hidden flex">
-          {!withoutSidebar.includes(location.pathname) && <Sidebar />}
+          {!withoutSidebar.includes(location.pathname) &&
+            !location.pathname.includes('/nova-senha') && <Sidebar />}
 
           <Routes>
             <Route path="/" element={<Home />} />
@@ -79,6 +81,7 @@ function App() {
             <Route path="/entrar" element={<SignIn />} />
             <Route path="/configuracoes" element={<Settings />} />
             <Route path="/alterar-senha" element={<Settings />} />
+            <Route path="/nova-senha/:id" element={<CreatePassword />} />
           </Routes>
         </div>
 

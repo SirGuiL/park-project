@@ -15,6 +15,13 @@ type taxProps = {
   pixRate: number
 }
 
+type hasCachedPageData = {
+  // eslint-disable-next-line
+  cachedItems: any[]
+  page: number
+  pageSize?: number
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -171,13 +178,6 @@ export function formatCNPJ(cnpj: string) {
   const cnpj_regex = /(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/
 
   return cnpj.replace(cnpj_regex, '$1.$2.$3/$4-$5')
-}
-
-type hasCachedPageData = {
-  // eslint-disable-next-line
-  cachedItems: any[]
-  page: number
-  pageSize?: number
 }
 
 export function hasCachedPage(data: hasCachedPageData): boolean {
