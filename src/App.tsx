@@ -55,7 +55,7 @@ function App() {
       try {
         const response = await AccountService.getUsers()
 
-        saveStoredAccountUsers(response.data)
+        saveStoredAccountUsers(response.data.users)
       } catch (error) {
         console.error(error)
       }
