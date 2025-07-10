@@ -110,27 +110,29 @@ export const Settings = () => {
           </h2>
         </div>
 
-        <div className="flex w-full gap-2 px-5 py-1">
-          <Badge
-            variant="outline"
-            className={`rounded-xl cursor-pointer ${
-              selectedStep === 'user' ? 'bg-gray-200' : ''
-            }`}
-            onClick={() => setSelectedStep('user')}
-          >
-            <span className="text-sm">Usuário</span>
-          </Badge>
+        {user.role === 'ADMIN' && (
+          <div className="flex w-full gap-2 px-5 py-1">
+            <Badge
+              variant="outline"
+              className={`rounded-xl cursor-pointer ${
+                selectedStep === 'user' ? 'bg-gray-200' : ''
+              }`}
+              onClick={() => setSelectedStep('user')}
+            >
+              <span className="text-sm">Usuário</span>
+            </Badge>
 
-          <Badge
-            variant="outline"
-            className={`rounded-xl cursor-pointer ${
-              selectedStep === 'account' ? 'bg-gray-200' : ''
-            }`}
-            onClick={() => setSelectedStep('account')}
-          >
-            <span className="text-sm">Estacionamento</span>
-          </Badge>
-        </div>
+            <Badge
+              variant="outline"
+              className={`rounded-xl cursor-pointer ${
+                selectedStep === 'account' ? 'bg-gray-200' : ''
+              }`}
+              onClick={() => setSelectedStep('account')}
+            >
+              <span className="text-sm">Estacionamento</span>
+            </Badge>
+          </div>
+        )}
 
         {selectedStep === 'user' ? (
           <>
