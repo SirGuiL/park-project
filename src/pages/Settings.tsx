@@ -1,5 +1,4 @@
 import { useState } from 'react'
-// import { add } from 'date-fns'
 import toast from 'react-hot-toast'
 
 import {
@@ -27,7 +26,7 @@ export const Settings = () => {
   const [isLoadingUpdatePassword, setIsLoadingUpdatePassword] = useState(false)
 
   const { user } = useUser()
-  const { saveStoredAccountUsers } = useAccount()
+  const { saveStoredAccountUsers, saveStoredMaxPages } = useAccount()
 
   const updateTwoFactorVerification = (value: boolean) => {
     console.log(value)
@@ -90,9 +89,16 @@ export const Settings = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await AccountService.getUsers()
+      const limit = 10
+
+      const response = await AccountService.getUsers({
+        limit,
+        page: 1,
+        query: '',
+      })
 
       saveStoredAccountUsers(response.data.users)
+      saveStoredMaxPages(Math.ceil(response.data.metadata.count / limit))
     } catch (error) {
       console.error(error)
     }

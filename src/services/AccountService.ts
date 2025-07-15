@@ -9,6 +9,12 @@ type updateProps = createProps & {
   cnpj?: string
 }
 
+type getUsersProps = {
+  page: number
+  limit: number
+  query: string
+}
+
 export class AccountService {
   static async create(props: createProps) {
     return await api.post('/account', props)
@@ -27,7 +33,9 @@ export class AccountService {
     })
   }
 
-  static async getUsers() {
-    return await api.get('/account/users')
+  static async getUsers(props: getUsersProps) {
+    return await api.get('/account/users', {
+      params: props,
+    })
   }
 }

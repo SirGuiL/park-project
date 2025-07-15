@@ -7,6 +7,10 @@ export type AccountContextProps = {
   accountUsers: User[]
   saveStoredAccount: (account: Account) => void
   saveStoredAccountUsers: (users: User[]) => void
+  page: number
+  maxPages: number
+  setPage: (page: number) => void
+  saveStoredMaxPages: (maxPages: number) => void
 }
 
 type AccountContextProviderProps = {
@@ -27,6 +31,8 @@ export function AccountContextProvider({
     created_at: new Date(),
     cnpj: '',
   })
+  const [page, setPage] = useState(1)
+  const [maxPages, setMaxPages] = useState(1)
 
   const saveStoredAccount = useCallback((account: Account) => {
     setAccount(account)
@@ -36,6 +42,10 @@ export function AccountContextProvider({
     setAccountUsers(users)
   }, [])
 
+  const saveStoredMaxPages = useCallback((maxPages: number) => {
+    setMaxPages(maxPages)
+  }, [])
+
   return (
     <AccountContext.Provider
       value={{
@@ -43,6 +53,10 @@ export function AccountContextProvider({
         saveStoredAccount,
         accountUsers,
         saveStoredAccountUsers,
+        page,
+        maxPages,
+        saveStoredMaxPages,
+        setPage,
       }}
     >
       {children}

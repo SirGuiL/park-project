@@ -25,7 +25,8 @@ function App() {
   const { isOpened } = useSidebar()
   const location = useLocation()
   const { saveStoredUser } = useUser()
-  const { saveStoredAccount, saveStoredAccountUsers } = useAccount()
+  const { saveStoredAccount, saveStoredAccountUsers, saveStoredMaxPages } =
+    useAccount()
 
   const withoutSidebar = ['/cadastro', '/entrar']
 
@@ -52,10 +53,17 @@ function App() {
     }
 
     const getAccountUsers = async () => {
+      const limit = 10
+
       try {
-        const response = await AccountService.getUsers()
+        const response = await AccountService.getUsers({
+          limit,
+          page: 1,
+          query: '',
+        })
 
         saveStoredAccountUsers(response.data.users)
+        saveStoredMaxPages(Math.ceil(response.data.metadata.count / limit))
       } catch (error) {
         console.error(error)
       }
@@ -65,7 +73,12 @@ function App() {
       getUser()
       getAccount()
     }, 100)
-  }, [saveStoredUser, saveStoredAccount, saveStoredAccountUsers])
+  }, [
+    saveStoredUser,
+    saveStoredAccount,
+    saveStoredAccountUsers,
+    saveStoredMaxPages,
+  ])
 
   return (
     <SidebarProvider open={isOpened}>
